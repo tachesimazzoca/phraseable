@@ -1,0 +1,4 @@
+GET     /                                        controllers.Application.index()
+GET     /pages/*name                             controllers.PagesController.page(name: String)
+
+GET     /accounts/$id<[0-9]+>                    controllers.AccountsController.get(id: Long)
