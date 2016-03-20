@@ -2,18 +2,16 @@ package models
 
 import java.sql.SQLException
 
-import anorm._
+import components.util.Timer
+import models.test._
 import org.scalatest.FunSuite
 import play.api.db.Database
-
-import models.test._
-import components.util.Timer
 
 class AccountDaoSuite extends FunSuite {
   def createAccountDao(
     timer: Timer = Timer.systemTimer
   )(implicit database: Database): AccountDao =
-      new AccountDao(database, timer)
+    new AccountDao(database, timer)
 
   def createTimer(t: Long) = new Timer {
     def currentTimeMillis = t
@@ -27,22 +25,6 @@ class AccountDaoSuite extends FunSuite {
           Account.Status.Active, "alice1@example.net"),
         Account(2L, "alice", Account.hashPassword("deadbeef"),
           Account.Status.Inactive, "alice2@example.net")
-      )
-      accountDao.create(accounts(0))
-      intercept[SQLException] {
-        accountDao.create(accounts(1))
-      }
-    }
-  }
-
-  test("email is unique") {
-    withTestDatabase() { implicit database =>
-      val accountDao = createAccountDao()
-      val accounts = Seq(
-        Account(1L, "alice1", Account.hashPassword("deadbeef"),
-          Account.Status.Active, "alice@example.net"),
-        Account(2L, "alice2", Account.hashPassword("deadbeef"),
-          Account.Status.Inactive, "alice@example.net")
       )
       accountDao.create(accounts(0))
       intercept[SQLException] {

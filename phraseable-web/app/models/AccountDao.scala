@@ -19,6 +19,11 @@ class AccountDao @Inject() (
       findQuery.on('id -> id).as(parser.singleOpt)
     }
 
+  def findByUsername(username: String): Option[Account] =
+    db.withConnection { implicit conn =>
+      findByUsernameQuery.on('username -> username).as(parser.singleOpt)
+    }
+
   def create(account: Account): Account =
     db.withTransaction { implicit conn =>
       val t = timer.currentTimeMillis
@@ -77,11 +82,13 @@ object AccountDao {
     }
   }
 
-  val findQuery = SQL("SELECT * FROM accounts WHERE id = {id}")
+  val findQuery = SQL("SELECT * FROM account WHERE id = {id}")
+
+  val findByUsernameQuery = SQL("SELECT * FROM account WHERE username = {username}")
 
   val insertQuery = SQL(
     """
-    INSERT INTO accounts (id, username,
+    INSERT INTO account (id, username,
       password_salt, password_hash, status, email,
       created_at, updated_at)
     VALUES ({id}, {username},
@@ -92,7 +99,7 @@ object AccountDao {
 
   val updateQuery = SQL(
     """
-    UPDATE accounts SET username = {username},
+    UPDATE account SET username = {username},
       password_salt = {password_salt},
       password_hash = {password_hash},
       status = {status},

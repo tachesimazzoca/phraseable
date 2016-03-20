@@ -14,10 +14,13 @@ case class Account(
 )
 
 object Account {
+
   sealed abstract class Status(val value: Int)
 
   object Status {
+
     case object Inactive extends Status(0)
+
     case object Active extends Status(1)
 
     def fromValue(v: Int): Status = v match {
