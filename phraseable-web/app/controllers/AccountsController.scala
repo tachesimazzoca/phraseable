@@ -2,8 +2,9 @@ package controllers
 
 import javax.inject.Inject
 
-import models.AccountDao
 import play.api.mvc.{Action, Controller}
+
+import models._
 
 class AccountsController @Inject() (
   accountDao: AccountDao
