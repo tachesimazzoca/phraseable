@@ -1,26 +1,22 @@
 package controllers
 
-import org.scalatest.FunSuite
-
-import scala.concurrent.Future
-
-import play.api.db.Database
-import play.api.http._
-import play.api.mvc._
-import play.api.test._
-import play.api.test.Helpers._
-
-import components.util.Timer
+import components.util.SystemClock
 import models._
 import models.test._
+import org.scalatest.FunSuite
+import play.api.http._
+import play.api.test.Helpers._
+import play.api.test._
 
 class AccountControllerSuite extends FunSuite {
 
+  val systemClock = new SystemClock
+
   test("postEntry") {
     withTestDatabase() { database =>
-      val accountDao = new AccountDao(database, Timer.systemTimer)
-      val idSequenceDao = new IdSequenceDao(database)
-      val accountController = new AccountController(accountDao, idSequenceDao)
+      val accountDao = new AccountDao(systemClock)
+      val idSequenceDao = new IdSequenceDao
+      val accountController = new AccountController(database, accountDao, idSequenceDao)
       val postEntry = accountController.postEntry()
 
       assert(

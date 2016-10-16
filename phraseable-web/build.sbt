@@ -1,10 +1,8 @@
 name := "phraseable-web"
 
-version := "0.0.0-SNAPSHOT"
+version := "0.1.0-SNAPSHOT"
 
 scalaVersion := "2.11.8"
-
-scalastyleConfig := baseDirectory.value / "etc" / "scalastyle" / "scalastyle-config.xml"
 
 libraryDependencies ++= Seq(
   jdbc,

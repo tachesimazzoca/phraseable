@@ -14,6 +14,9 @@ object IdSequence {
   object SequenceType {
 
     case object Account extends SequenceType("account")
+    case object Phrase extends SequenceType("phrase")
+    case object PhraseTranslation extends SequenceType("phrase_translation")
+    case object Category extends SequenceType("category")
 
   }
 

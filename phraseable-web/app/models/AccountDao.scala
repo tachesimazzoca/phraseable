@@ -1,52 +1,47 @@
 package models
 
+import java.sql.Connection
 import javax.inject.{Inject, Singleton}
 
 import anorm._
-import play.api.db.{Database, NamedDatabase}
-
-import components.util.Timer
+import components.util.Clock
 
 @Singleton
 class AccountDao @Inject() (
-  db: Database,
-  timer: Timer
-) {
-  import AccountDao._
+  clock: Clock
+) extends CRUDDaoSupport[Account, Long] {
 
-  def find(id: Long): Option[Account] =
-    db.withConnection { implicit conn =>
-      findQuery.on('id -> id).as(parser.singleOpt)
+  val tableName = "account"
+
+  val idColumn = "id"
+
+  val columns = Seq(
+    "id", "username", "password_salt", "password_hash",
+    "status", "email",
+    "created_at", "updated_at"
+  )
+
+  val rowParser: RowParser[Account] = {
+    import anorm.SqlParser._
+    get[Long]("id") ~
+      get[String]("username") ~
+      get[String]("password_salt") ~
+      get[String]("password_hash") ~
+      get[Int]("status") ~
+      get[String]("email") ~
+      get[Option[java.util.Date]]("created_at") ~
+      get[Option[java.util.Date]]("updated_at") map {
+      case id ~ username ~ passwordSalt ~ passwordHash ~
+        status ~ email ~ createdAt ~ updatedAt =>
+        Account(id, username,
+          Account.Password(passwordSalt, passwordHash),
+          Account.Status.fromValue(status), email,
+          createdAt.map { ts => new java.util.Date(ts.getTime) },
+          updatedAt.map { ts => new java.util.Date(ts.getTime) })
     }
+  }
 
-  def findByUsername(username: String): Option[Account] =
-    db.withConnection { implicit conn =>
-      findByUsernameQuery.on('username -> username).as(parser.singleOpt)
-    }
-
-  def create(account: Account): Account =
-    db.withTransaction { implicit conn =>
-      val t = timer.currentTimeMillis
-      val created = account.copy(
-        createdAt = Some(new java.util.Date(t)),
-        updatedAt = None
-      )
-      insertQuery.on(toNamedParameter(created): _*).executeUpdate()
-      created
-    }
-
-  def update(account: Account): Account =
-    db.withTransaction { implicit conn =>
-      val t = timer.currentTimeMillis
-      val updated = account.copy(
-        createdAt = account.createdAt.orElse(Some(new java.util.Date(t))),
-        updatedAt = Some(new java.util.Date(t))
-      )
-      updateQuery.on(toNamedParameter(updated): _*).executeUpdate()
-      updated
-    }
-
-  private def toNamedParameter(account: Account) = {
+  override def toNamedParameter(account: Account) = {
     Seq[NamedParameter](
       'id -> account.id,
       'username -> account.username,
@@ -58,55 +53,17 @@ class AccountDao @Inject() (
       'updated_at -> account.updatedAt
     )
   }
-}
 
-object AccountDao {
-  import anorm.SqlParser._
-
-  def parser: RowParser[Account] = {
-    get[Long]("id") ~
-    get[String]("username") ~
-    get[String]("password_salt") ~
-    get[String]("password_hash") ~
-    get[Int]("status") ~
-    get[String]("email") ~
-    get[Option[java.util.Date]]("created_at") ~
-    get[Option[java.util.Date]]("updated_at") map {
-      case id ~ username ~ passwordSalt ~ passwordHash ~
-        status ~ email ~ createdAt ~ updatedAt =>
-        Account(id, username,
-          Account.Password(passwordSalt, passwordHash),
-          Account.Status.fromValue(status), email,
-          createdAt.map { ts => new java.util.Date(ts.getTime) },
-          updatedAt.map { ts => new java.util.Date(ts.getTime) })
-    }
+  override def onUpdate(account: Account): Account = {
+    val t = clock.currentTimeMillis
+    account.copy(
+      createdAt = account.createdAt.orElse(Some(new java.util.Date(t))),
+      updatedAt = Some(new java.util.Date(t))
+    )
   }
-
-  val findQuery = SQL("SELECT * FROM account WHERE id = {id}")
 
   val findByUsernameQuery = SQL("SELECT * FROM account WHERE username = {username}")
 
-  val insertQuery = SQL(
-    """
-    INSERT INTO account (id, username,
-      password_salt, password_hash, status, email,
-      created_at, updated_at)
-    VALUES ({id}, {username},
-      {password_salt}, {password_hash}, {status}, {email},
-      {created_at}, {updated_at})
-    """
-  )
-
-  val updateQuery = SQL(
-    """
-    UPDATE account SET username = {username},
-      password_salt = {password_salt},
-      password_hash = {password_hash},
-      status = {status},
-      email = {email},
-      created_at = {created_at},
-      updated_at = {updated_at}
-    WHERE id = {id}
-    """
-  )
+  def findByUsername(username: String)(implicit conn: Connection): Option[Account] =
+    findByUsernameQuery.on('username -> username).as(rowParser.singleOpt)
 }
