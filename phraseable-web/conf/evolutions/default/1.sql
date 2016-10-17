@@ -1,6 +1,14 @@
 # schema
 
 # --- !Ups
+CREATE TABLE `session_storage` (
+  `storage_key` VARCHAR(255) NOT NULL,
+  `storage_value` TEXT,
+  `modified_at` TIMESTAMP,
+  PRIMARY KEY (`storage_key`)
+);
+CREATE INDEX `idx_session_storage_01` ON `session_storage` (`modified_at`);
+
 CREATE TABLE `id_sequence` (
   `sequence_name` VARCHAR(255) NOT NULL UNIQUE,
   `sequence_value` BIGINT NOT NULL,
