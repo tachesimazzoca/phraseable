@@ -4,11 +4,13 @@ import javax.inject.{Inject, Singleton}
 
 import anorm._
 import components.util.Clock
+import play.api.db.Database
 
 @Singleton
 class CategoryDao @Inject() (
+  db: Database,
   clock: Clock
-) extends CRUDDaoSupport[Category, Long] {
+) extends AbstractDao[Category, Long](db) {
 
   val tableName = "category"
 

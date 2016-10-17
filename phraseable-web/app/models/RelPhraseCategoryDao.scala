@@ -1,12 +1,12 @@
 package models
 
-import java.sql.{Connection, SQLException}
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
 
 import anorm._
+import play.api.db.Database
 
 @Singleton
-class RelPhraseCategoryDao {
+class RelPhraseCategoryDao @Inject() (db: Database) {
 
   private val findByPhraseIdQuery =
     SQL(
@@ -27,20 +27,19 @@ class RelPhraseCategoryDao {
          DELETE FROM rel_phrase_category WHERE phrase_id = {phrase_id}
       """)
 
-  def findByPhraseId(phraseId: Long)(implicit conn: Connection): Set[Long] = {
-    findByPhraseIdQuery.on('phrase_id -> phraseId).fold(Set.empty[Long]) { (acc, row) =>
-      acc + row[Long]("category_id")
-    } match {
-      case Right(xs) => xs
-      case Left(es) => throw new SQLException(es.size + " errors found")
+  def findByPhraseId(phraseId: Long): Set[Long] =
+    db.withConnection { implicit conn =>
+      findByPhraseIdQuery.on('phrase_id -> phraseId).as(SqlParser.get[Long]("category_id").*).toSet
     }
-  }
 
-  def updateByPhraseId(phraseId: Long, categoryIdSet: Set[Long])(implicit conn: Connection): Unit = {
-    deleteByPhraseIdQuery.on('phrase_id -> phraseId).executeUpdate()
-    categoryIdSet.foreach(x => insertQuery.on('phrase_id -> phraseId, 'category_id -> x).executeUpdate())
-  }
+  def updateByPhraseId(phraseId: Long, categoryIdSet: Set[Long]): Unit =
+    db.withTransaction { implicit conn =>
+      deleteByPhraseIdQuery.on('phrase_id -> phraseId).executeUpdate()
+      categoryIdSet.foreach(x => insertQuery.on('phrase_id -> phraseId, 'category_id -> x).executeUpdate())
+    }
 
-  def deleteByPhraseId(phraseId: Long)(implicit conn: Connection): Unit =
-    deleteByPhraseIdQuery.on('phrase_id -> phraseId).executeUpdate()
+  def deleteByPhraseId(phraseId: Long): Unit =
+    db.withTransaction { implicit conn =>
+      deleteByPhraseIdQuery.on('phrase_id -> phraseId).executeUpdate()
+    }
 }

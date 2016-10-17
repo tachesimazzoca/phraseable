@@ -13,10 +13,10 @@ class AccountControllerSuite extends FunSuite {
   val systemClock = new SystemClock
 
   test("postEntry") {
-    withTestDatabase() { database =>
-      val accountDao = new AccountDao(systemClock)
-      val idSequenceDao = new IdSequenceDao
-      val accountController = new AccountController(database, accountDao, idSequenceDao)
+    withTestDatabase() { db =>
+      val accountDao = new AccountDao(db, systemClock)
+      val idSequenceDao = new IdSequenceDao(db)
+      val accountController = new AccountController(accountDao, idSequenceDao)
       val postEntry = accountController.postEntry()
 
       assert(

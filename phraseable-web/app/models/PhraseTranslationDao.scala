@@ -4,11 +4,13 @@ import javax.inject.{Inject, Singleton}
 
 import anorm._
 import components.util.Clock
+import play.api.db.Database
 
 @Singleton
 class PhraseTranslationDao @Inject() (
+  db: Database,
   clock: Clock
-) extends CRUDDaoSupport[PhraseTranslation, Long] {
+) extends AbstractDao[PhraseTranslation, Long](db) {
 
   val tableName = "phrase_translation"
 

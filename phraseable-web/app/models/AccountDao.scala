@@ -1,15 +1,16 @@
 package models
 
-import java.sql.Connection
 import javax.inject.{Inject, Singleton}
 
 import anorm._
 import components.util.Clock
+import play.api.db.Database
 
 @Singleton
 class AccountDao @Inject() (
+  db: Database,
   clock: Clock
-) extends CRUDDaoSupport[Account, Long] {
+) extends AbstractDao[Account, Long](db) {
 
   val tableName = "account"
 
@@ -64,6 +65,8 @@ class AccountDao @Inject() (
 
   val findByUsernameQuery = SQL("SELECT * FROM account WHERE username = {username}")
 
-  def findByUsername(username: String)(implicit conn: Connection): Option[Account] =
-    findByUsernameQuery.on('username -> username).as(rowParser.singleOpt)
+  def findByUsername(username: String): Option[Account] =
+    db.withConnection { implicit conn =>
+      findByUsernameQuery.on('username -> username).as(rowParser.singleOpt)
+    }
 }
