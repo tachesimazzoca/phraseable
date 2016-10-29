@@ -2,7 +2,19 @@ package components.storage
 
 import java.net.{URLDecoder, URLEncoder}
 
-class Storage(engine: StorageEngine, namespace: String = "") {
+import components.util.{Chance, Chances}
+
+object Storage {
+
+  case class Settings(
+    namespace: String = "",
+    gcMaxLifetime: Option[Long] = None,
+    gcChance: Chance = Chances.random(1, 100)
+  )
+
+}
+
+class Storage(engine: StorageEngine, settings: Storage.Settings = Storage.Settings()) {
 
   private val encoding = "UTF-8"
 
@@ -23,17 +35,32 @@ class Storage(engine: StorageEngine, namespace: String = "") {
   }
 
   def create(data: Map[String, String]): String = {
-    val key = namespace + java.util.UUID.randomUUID().toString
+    gc()
+    val key = settings.namespace + java.util.UUID.randomUUID().toString
     engine.write(key, serialize(data))
     key
   }
 
-  def read(key: String): Option[Map[String, String]] =
+  def read(key: String): Option[Map[String, String]] = {
+    gc()
     engine.read(key).map { bytes =>
       unserialize(bytes)
     }
+  }
 
-  def write(key: String, data: Map[String, String]): Unit = engine.write(key, serialize(data))
+  def write(key: String, data: Map[String, String]): Unit = {
+    gc()
+    engine.write(key, serialize(data))
+  }
 
-  def delete(key: String): Unit = engine.delete(key)
+  def delete(key: String): Unit = {
+    gc()
+    engine.delete(key)
+  }
+
+  def gc(): Unit = settings.gcMaxLifetime.foreach { lifetime =>
+    if (settings.gcChance.yes()) {
+      engine.gc(lifetime)
+    }
+  }
 }
