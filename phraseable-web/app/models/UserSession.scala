@@ -7,7 +7,7 @@ import components.storage.Storage
 
 object UserSession {
 
-  case class Data(id: Long)
+  case class Data(id: Option[Long])
 
 }
 
@@ -17,17 +17,19 @@ class UserSession @Inject() (
 
   import UserSession._
 
-  def create(data: Data): String = {
-    storage.create(Map("id" -> data.id.toString))
-  }
+  def create(): String = storage.create()
 
-  def find(key: String): Option[Data] =
+  def read(key: String): Option[Data] =
     for {
       m <- storage.read(key)
       id <- m.get("id")
     } yield {
-      Data(id.toLong)
+      val idOpt = if (id.isEmpty) None else Some(id.toLong)
+      Data(idOpt)
     }
+
+  def update(key: String, data: Data): Unit =
+    storage.write(key, Map("id" -> data.id.toString))
 
   def delete(key: String): Unit = storage.delete(key)
 }

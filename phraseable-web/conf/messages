@@ -1,0 +1,4 @@
+AccountSignUpForm.error.username=Username must be 4...32 alpha-numeric characters.
+AccountSignUpForm.error.password=Password must be 8...64 characters.
+AccountSignUpForm.error.retypedPassword=Re-typed Password must be equal to Password.
+AccountSignUpForm.error.uniqueUsername=The Username has already been registered.

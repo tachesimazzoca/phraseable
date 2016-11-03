@@ -7,6 +7,11 @@ import components.util.Chances
 
 class ApplicationModule extends AbstractModule {
   def configure() = {
+    // sessionIdKey
+    bind(classOf[String])
+      .annotatedWith(Names.named("sessionIdKey"))
+      .toInstance("PLAYSESSID")
+
     // sessionStorage
     bind(classOf[Storage.Settings])
       .annotatedWith(Names.named("sessionStorageSettings"))

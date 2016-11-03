@@ -1,2 +1,11 @@
 GET     /                                        controllers.Application.index()
+
+GET     /pages                                   controllers.PagesController.index()
 GET     /pages/*name                             controllers.PagesController.page(name: String)
+
+GET     /account/signup                          controllers.AccountController.signUp()
+POST    /account/signup                          controllers.AccountController.postSignUp()
+
+GET     /dashboard                               controllers.DashboardController.index()
+
+GET     /*file                                   controllers.Assets.at(path="/public", file)

@@ -1,0 +1,39 @@
+@(form: Form[models.form.AccountSignUpForm])(implicit messages: Messages)
+
+@import _helpers.default._
+@import play.api.i18n.Messages
+
+@_layouts.default(Some("Sign Up")) {
+
+  @if(form.hasErrors) {
+<div class="alert alert-danger">
+  <ul>
+    @form.errors.map { err =>
+    <li>@Messages(err.message, err.args: _*)</li>
+    }
+  </ul>
+</div>
+  }
+
+<div style="width: 400px">
+  @helper.form(routes.AccountController.postSignUp()) {
+  <div class="well">
+    <div class="form-group">
+      <label>Username</label>
+      @toHtmlInput(form("username"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      @toHtmlInput(form("password.main"), 'type -> "password", 'class -> "form-control")
+    </div>
+    <div class="form-group">
+      <label>Re-typed Password</label>
+      @toHtmlInput(form("password.confirmation"), 'type -> "password", 'class -> "form-control")
+    </div>
+    <div>
+      <input type="submit" value="Sign Up" class="btn btn-success">
+    </div>
+  </div>
+  }
+</div>
+}

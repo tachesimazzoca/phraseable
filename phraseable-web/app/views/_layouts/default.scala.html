@@ -5,10 +5,33 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <!--<meta name="viewport" content="width=device-width, initial-scale=1">-->
   <title>@{title.map(_ ++ " | Phraseable").getOrElse("Phraseable")}</title>
+  <link rel="stylesheet" href="@routes.Assets.at("assets/lib/bootstrap/css/bootstrap.min.css")">
+  <link rel="stylesheet" href="@routes.Assets.at("assets/css/bootstrap-override.css")">
+  <script type="text/javascript" src="@routes.Assets.at("assets/lib/jquery/jquery.min.js")"></script>
+  <script type="text/javascript" src="@routes.Assets.at("assets/lib/bootstrap/js/bootstrap.min.js")"></script>
 </head>
 <body>
 <div id="wrapper">
   <div id="header">
+    <div class="navbar navbar-default" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#jsNavbarCollapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="">Home</a>
+        </div>
+        <div class="collapse navbar-collapse" id="jsNavbarCollapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="@routes.DashboardController.index()">Dashboard</a></li>
+            <li><a href="@routes.PagesController.page("help/")">Help</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
   <div id="content">
     <div class="container-fluid">
@@ -24,7 +47,7 @@
     <hr>
     <div class="container-fluid">
       <div class="row-fluid">
-        <p>&copy; Copyright 2016 <a href="http://github.com/tachesimazzoca">tachesimazzoca</a>.</p>
+        <p>&copy; Copyright 2016 <a href="https://github.com/tachesimazzoca">tachesimazzoca</a>.</p>
       </div>
     </div>
   </div>

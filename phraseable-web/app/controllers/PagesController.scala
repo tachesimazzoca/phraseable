@@ -22,6 +22,10 @@ class PagesController extends Controller {
     }
   }
 
+  def index() = Action {
+    Redirect(routes.Application.index())
+  }
+
   def page(name: String) = Action {
     (for {
       classpath <- parsePathString(name)

@@ -34,9 +34,14 @@ class Storage(engine: StorageEngine, settings: Storage.Settings = Storage.Settin
       .toMap
   }
 
+  private def generateKey(): String =
+    settings.namespace + java.util.UUID.randomUUID().toString
+
+  def create(): String = generateKey()
+
   def create(data: Map[String, String]): String = {
     gc()
-    val key = settings.namespace + java.util.UUID.randomUUID().toString
+    val key = generateKey()
     engine.write(key, serialize(data))
     key
   }

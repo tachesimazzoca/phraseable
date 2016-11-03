@@ -75,6 +75,6 @@ class DatabaseStorageEngine(
   override def gc(lifetime: Long): Unit =
     db.withTransaction { implicit conn =>
       val t = clock.currentTimeMillis - (lifetime * 1000L)
-      GC_SQL.on('storage_key -> new java.util.Date(t)).execute()
+      GC_SQL.on('modified_at -> new java.util.Date(t)).execute()
     }
 }
