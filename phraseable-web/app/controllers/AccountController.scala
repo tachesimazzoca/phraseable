@@ -24,7 +24,6 @@ class AccountController @Inject() (
       form => BadRequest(views.html.account.entry(form)),
       data => {
         accountDao.findByEmail(data.email).map { _ =>
-          // The account.username is not unique.
           val formWithError = form.bind(form.mapping.unbind(data).updated("uniqueEmail", "false"))
           BadRequest(views.html.account.entry(formWithError))
         }.getOrElse {
