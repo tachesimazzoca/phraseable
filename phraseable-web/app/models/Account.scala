@@ -5,10 +5,9 @@ import org.apache.commons.lang3.RandomStringUtils
 
 case class Account(
   id: Long,
-  username: String,
+  email: String,
   password: Account.Password,
   status: Account.Status,
-  email: String,
   createdAt: Option[java.util.Date] = None,
   updatedAt: Option[java.util.Date] = None
 )

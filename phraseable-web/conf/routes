@@ -3,8 +3,10 @@ GET     /                                        controllers.Application.index()
 GET     /pages                                   controllers.PagesController.index()
 GET     /pages/*name                             controllers.PagesController.page(name: String)
 
-GET     /account/signup                          controllers.AccountController.signUp()
-POST    /account/signup                          controllers.AccountController.postSignUp()
+GET     /account/entry                           controllers.AccountController.entry()
+POST    /account/entry                           controllers.AccountController.postEntry()
+GET     /account/verify                          controllers.AccountController.verify()
+GET     /account/activate                        controllers.AccountController.activate()
 
 GET     /dashboard                               controllers.DashboardController.index()
 

@@ -14,4 +14,6 @@ libraryDependencies ++= Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0" % "test"
 )
 
+javaOptions in Test += "-Dconfig.file=conf/test/application.conf"
+
 lazy val main = (project in file(".")).enablePlugins(PlayScala)

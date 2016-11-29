@@ -21,16 +21,15 @@ INSERT INTO `id_sequence` VALUES ('category', 0);
 
 CREATE TABLE `account` (
   `id` BIGINT NOT NULL,
-  `username` VARCHAR(255) NOT NULL DEFAULT '' UNIQUE,
+  `email` VARCHAR(255) NOT NULL DEFAULT '' UNIQUE,
   `password_salt` VARCHAR(4) NOT NULL DEFAULT '',
   `password_hash` VARCHAR(40) NOT NULL DEFAULT '',
   `status` TINYINT(1) NOT NULL DEFAULT 0,
-  `email` VARCHAR(255) NOT NULL DEFAULT '',
   `created_at` TIMESTAMP,
   `updated_at` TIMESTAMP,
   PRIMARY KEY (`id`)
 );
-CREATE INDEX `idx_account_01` ON `account` (`username`);
+CREATE INDEX `idx_account_01` ON `account` (`email`);
 
 CREATE TABLE `phrase` (
   `id` BIGINT NOT NULL,
@@ -68,3 +67,12 @@ CREATE TABLE `rel_phrase_category` (
 );
 CREATE INDEX `idx_rel_phrase_category_01` ON `rel_phrase_category` (`phrase_id`);
 CREATE INDEX `idx_rel_phrase_category_02` ON `rel_phrase_category` (`category_id`);
+
+# --- !Downs
+DROP TABLE `session_storage`;
+DROP TABLE `id_sequence`;
+DROP TABLE `account`;
+DROP TABLE `phrase`;
+DROP TABLE `phrase_translation`;
+DROP TABLE `category`;
+DROP TABLE `rel_phrase_category`;

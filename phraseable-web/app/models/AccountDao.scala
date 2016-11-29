@@ -17,26 +17,23 @@ class AccountDao @Inject() (
   val idColumn = "id"
 
   val columns = Seq(
-    "id", "username", "password_salt", "password_hash",
-    "status", "email",
-    "created_at", "updated_at"
+    "id", "email", "password_salt", "password_hash",
+    "status", "created_at", "updated_at"
   )
 
   val rowParser: RowParser[Account] = {
     import anorm.SqlParser._
     get[Long]("id") ~
-      get[String]("username") ~
+      get[String]("email") ~
       get[String]("password_salt") ~
       get[String]("password_hash") ~
       get[Int]("status") ~
-      get[String]("email") ~
       get[Option[java.util.Date]]("created_at") ~
       get[Option[java.util.Date]]("updated_at") map {
-      case id ~ username ~ passwordSalt ~ passwordHash ~
-        status ~ email ~ createdAt ~ updatedAt =>
-        Account(id, username,
-          Account.Password(passwordSalt, passwordHash),
-          Account.Status.fromValue(status), email,
+      case id ~ email ~ passwordSalt ~ passwordHash ~
+        status ~ createdAt ~ updatedAt =>
+        Account(id, email, Account.Password(passwordSalt, passwordHash),
+          Account.Status.fromValue(status),
           createdAt.map { ts => new java.util.Date(ts.getTime) },
           updatedAt.map { ts => new java.util.Date(ts.getTime) })
     }
@@ -45,11 +42,10 @@ class AccountDao @Inject() (
   override def toNamedParameter(account: Account) = {
     Seq[NamedParameter](
       'id -> account.id,
-      'username -> account.username,
+      'email -> account.email,
       'password_salt -> account.password.salt,
       'password_hash -> account.password.hash,
       'status -> account.status.value,
-      'email -> account.email,
       'created_at -> account.createdAt,
       'updated_at -> account.updatedAt
     )
@@ -63,10 +59,10 @@ class AccountDao @Inject() (
     )
   }
 
-  val findByUsernameQuery = SQL("SELECT * FROM account WHERE username = {username}")
+  val findByEmailQuery = SQL("SELECT * FROM account WHERE email= {email}")
 
-  def findByUsername(username: String): Option[Account] =
+  def findByEmail(email: String): Option[Account] =
     db.withConnection { implicit conn =>
-      findByUsernameQuery.on('username -> username).as(rowParser.singleOpt)
+      findByEmailQuery.on('email -> email).as(rowParser.singleOpt)
     }
 }

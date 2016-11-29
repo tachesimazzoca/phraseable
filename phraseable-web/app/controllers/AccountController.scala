@@ -13,28 +13,32 @@ class AccountController @Inject() (
   val messagesApi: MessagesApi
 ) extends Controller with I18nSupport {
 
-  private val form = AccountSignUpForm.defaultForm
+  private val form = AccountEntryForm.defaultForm
 
-  def signUp = Action { implicit request =>
-    Ok(views.html.account.signUp(form))
+  def entry = Action { implicit request =>
+    Ok(views.html.account.entry(form))
   }
 
-  def postSignUp = Action { implicit request =>
+  def postEntry = Action { implicit request =>
     form.bindFromRequest.fold(
-      form => BadRequest(views.html.account.signUp(form)),
+      form => BadRequest(views.html.account.entry(form)),
       data => {
-        accountDao.findByUsername(data.username).map { _ =>
+        accountDao.findByEmail(data.email).map { _ =>
           // The account.username is not unique.
-          val formWithError = form.bind(form.mapping.unbind(data).updated("uniqueUsername", "false"))
-          BadRequest(views.html.account.signUp(formWithError))
+          val formWithError = form.bind(form.mapping.unbind(data).updated("uniqueEmail", "false"))
+          BadRequest(views.html.account.entry(formWithError))
         }.getOrElse {
           val id = idSequenceDao.nextId(IdSequence.SequenceType.Account)
-          val account = Account(id, data.username, Account.hashPassword(data.password),
-            Account.Status.Active, "")
+          val account = Account(id, data.email, Account.hashPassword(data.password),
+            Account.Status.Active)
           accountDao.create(account)
           Ok
         }
       }
     )
   }
+
+  def verify = TODO
+
+  def activate = TODO
 }
