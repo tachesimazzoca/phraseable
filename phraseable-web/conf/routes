@@ -7,6 +7,7 @@ GET     /account/entry                           controllers.AccountController.e
 POST    /account/entry                           controllers.AccountController.postEntry()
 GET     /account/verify                          controllers.AccountController.verify()
 GET     /account/activate                        controllers.AccountController.activate()
+GET     /account/error/*name                     controllers.AccountController.error(name: String)
 
 GET     /dashboard                               controllers.DashboardController.index()
 

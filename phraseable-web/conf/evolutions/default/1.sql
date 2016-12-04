@@ -9,6 +9,14 @@ CREATE TABLE `session_storage` (
 );
 CREATE INDEX `idx_session_storage_01` ON `session_storage` (`modified_at`);
 
+CREATE TABLE `verification_storage` (
+  `storage_key` VARCHAR(255) NOT NULL,
+  `storage_value` TEXT,
+  `modified_at` TIMESTAMP,
+  PRIMARY KEY (`storage_key`)
+);
+CREATE INDEX `idx_verification_storage_01` ON `verification_storage` (`modified_at`);
+
 CREATE TABLE `id_sequence` (
   `sequence_name` VARCHAR(255) NOT NULL UNIQUE,
   `sequence_value` BIGINT NOT NULL,
@@ -70,6 +78,7 @@ CREATE INDEX `idx_rel_phrase_category_02` ON `rel_phrase_category` (`category_id
 
 # --- !Downs
 DROP TABLE `session_storage`;
+DROP TABLE `verification_storage`;
 DROP TABLE `id_sequence`;
 DROP TABLE `account`;
 DROP TABLE `phrase`;

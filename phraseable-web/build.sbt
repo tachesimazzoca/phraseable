@@ -10,6 +10,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "anorm" % "2.5.0",
   "com.h2database" % "h2" % "1.4.178",
   "org.apache.commons" % "commons-lang3" % "3.4",
+  "org.apache.commons" % "commons-email" % "1.3.2",
   "commons-codec" % "commons-codec" % "1.10",
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.0" % "test"
 )

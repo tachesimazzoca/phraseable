@@ -20,8 +20,8 @@ class UserAction @Inject() (
       val sessionId = cookie.value
       val account = for {
         data <- userSession.read(sessionId)
-        id <- data.id
-        a <- accountDao.find(id)
+        accountId <- data.accountId
+        a <- accountDao.find(accountId)
       } yield a
       // TODO: Re-generate session Id to refuse session fixation attacks.
       UserRequest.Data(sessionId, account)

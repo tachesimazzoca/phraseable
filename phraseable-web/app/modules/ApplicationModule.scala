@@ -20,5 +20,14 @@ class ApplicationModule extends AbstractModule {
       .annotatedWith(Names.named("sessionStorage"))
       .toProvider(classOf[SessionStorageProvider])
       .asEagerSingleton()
+
+    // verificationStorage
+    bind(classOf[Storage.Settings])
+      .annotatedWith(Names.named("verificationStorageSettings"))
+      .toInstance(Storage.Settings(gcMaxLifetime = Some(1440L), gcChance = Chances.random(1, 100)))
+    bind(classOf[Storage])
+      .annotatedWith(Names.named("verificationStorage"))
+      .toProvider(classOf[VerificationStorageProvider])
+      .asEagerSingleton()
   }
 }

@@ -1,13 +1,12 @@
 package models
 
-import javax.inject.Named
+import javax.inject.{Inject, Named}
 
-import com.google.inject.Inject
 import components.storage.Storage
 
 object UserSession {
 
-  case class Data(id: Option[Long])
+  case class Data(accountId: Option[Long])
 
 }
 
@@ -22,14 +21,14 @@ class UserSession @Inject() (
   def read(key: String): Option[Data] =
     for {
       m <- storage.read(key)
-      id <- m.get("id")
+      accountId <- m.get("accountId")
     } yield {
-      val idOpt = if (id.isEmpty) None else Some(id.toLong)
-      Data(idOpt)
+      Data(if (accountId.isEmpty) None else Some(accountId.toLong))
     }
 
-  def update(key: String, data: Data): Unit =
-    storage.write(key, Map("id" -> data.id.toString))
+  def update(key: String, data: Data): Unit = {
+    storage.write(key, Map("id" -> data.accountId.toString))
+  }
 
   def delete(key: String): Unit = storage.delete(key)
 }
