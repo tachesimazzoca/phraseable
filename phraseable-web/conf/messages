@@ -1,4 +1,6 @@
-AccountEntryForm.error.email=E-mail address must be a valid e-mail address.
-AccountEntryForm.error.password=Password must be 8...32 characters.
-AccountEntryForm.error.retypedPassword=Re-typed password must be equal to the password.
-AccountEntryForm.error.uniqueEmail=The e-mail address has been registered.
+AccountLoginForm.error.authorized=Invalid E-mail address or Password
+
+AccountCreateForm.error.email=E-mail address must be a valid e-mail address.
+AccountCreateForm.error.password=Password must be 8...32 characters.
+AccountCreateForm.error.retypedPassword=Re-typed password must be equal to the password.
+AccountCreateForm.error.uniqueEmail=The e-mail address has been registered.

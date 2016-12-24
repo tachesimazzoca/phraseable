@@ -5,34 +5,34 @@ import play.api.data._
 import play.api.data.format.Formats._
 import play.api.data.validation.Constraints._
 
-case class AccountEntryForm(email: String, password: String)
+case class AccountCreateForm(email: String, password: String)
 
-object AccountEntryForm {
+object AccountCreateForm {
 
   private val form = Form(
     mapping(
       "email" -> text.verifying(emailAddress),
       "password" -> tuple(
         "main" -> text.verifying(
-          "AccountEntryForm.error.password",
+          "AccountCreateForm.error.password",
           _.matches( """^.{8,64}$""")
         ),
         "confirmation" -> text
       ).verifying(
-        "AccountEntryForm.error.retypedPassword",
+        "AccountCreateForm.error.retypedPassword",
         passwords => passwords._1 == passwords._2
       ),
       "uniqueEmail" -> default(of[Boolean], true).verifying(
-        "AccountEntryForm.error.uniqueEmail",
+        "AccountCreateForm.error.uniqueEmail",
         _ == true
       )
 
     ) { (email, passwords, _) =>
-      AccountEntryForm(email, passwords._1)
+      AccountCreateForm(email, passwords._1)
     } { a =>
       Some(a.email, (a.password, a.password), true)
     }
   )
 
-  def defaultForm: Form[AccountEntryForm] = form
+  def defaultForm: Form[AccountCreateForm] = form
 }

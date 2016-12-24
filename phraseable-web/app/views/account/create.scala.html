@@ -1,4 +1,4 @@
-@(form: Form[models.form.AccountEntryForm])(implicit messages: Messages)
+@(form: Form[models.form.AccountCreateForm])(implicit messages: Messages)
 
 @import _helpers.default._
 @import play.api.i18n.Messages
@@ -16,7 +16,7 @@
 }
 
 <div style="width: 400px">
-    @helper.form(routes.AccountController.postEntry()) {
+    @helper.form(routes.AccountController.postCreate()) {
     <div class="well">
         <div class="form-group">
             <label>E-mail Address</label>

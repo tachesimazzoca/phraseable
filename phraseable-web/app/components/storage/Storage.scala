@@ -30,8 +30,10 @@ class Storage(engine: StorageEngine, settings: Storage.Settings = Storage.Settin
   private def unserialize(bytes: Array[Byte]): Map[String, String] = {
     new String(bytes, encoding).split("&")
       .map(_.split("=", 2))
-      .map(p => (decode(p(0)), decode(p(1))))
-      .toMap
+      .withFilter(_.length == 2)
+      .map { p =>
+        (decode(p(0)), decode(p(1)))
+      }.toMap
   }
 
   private def generateKey(): String =

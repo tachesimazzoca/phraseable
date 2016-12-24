@@ -20,10 +20,14 @@ class TextMailer @Inject() (
       }
     }
 
-  private def parseMultiAddressValue(value: Option[Seq[HeaderValue]]): Option[Seq[AddressValue]] = {
-    value.flatMap {
-      case xs: Seq[AddressValue] => Some(xs)
-      case _ => None
+  private def parseMultiAddressValue(
+    value: Option[Seq[HeaderValue]]
+  ): Option[Seq[AddressValue]] = value.map { xs =>
+    xs.flatMap { x =>
+      x match {
+        case a @ AddressValue(_, _) => Some(a)
+        case _ => None
+      }
     }
   }
 

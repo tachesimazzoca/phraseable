@@ -28,7 +28,11 @@ object Account {
     }
   }
 
-  case class Password(salt: String, hash: String)
+  case class Password(salt: String, hash: String) {
+    def matches(rawPassword: String): Boolean = {
+      hash.equals(DigestUtils.sha1Hex(salt ++ rawPassword))
+    }
+  }
 
   private val PASSWORD_SALT_LENGTH = 4
 

@@ -2,14 +2,16 @@ package controllers
 
 import javax.inject.Inject
 
+import controllers.action.{MemberAction, UserAction}
 import play.api.mvc._
 
 class DashboardController @Inject() (
-  userAction: UserAction
+  userAction: UserAction,
+  memberAction: MemberAction
 ) extends Controller {
 
-  def index = userAction { implicit request =>
-    println(request.data)
+  def index = (userAction andThen memberAction) { implicit memberRequest =>
+    println(memberRequest.account)
     Ok("ok")
   }
 }
