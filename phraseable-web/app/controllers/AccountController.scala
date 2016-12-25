@@ -31,7 +31,7 @@ class AccountController @Inject() (
 
   def postLogin = userAction { implicit request =>
     userSessionStorage.delete(request.sessionId)
-    accountLoginForm.bindFromRequest.fold(
+    AccountLoginForm.fromRequest.fold(
       form => BadRequest(views.html.account.login(form)),
       data => {
         (for {
@@ -59,7 +59,7 @@ class AccountController @Inject() (
   }
 
   def postCreate = userAction { implicit request =>
-    accountCreateForm.bindFromRequest.fold(
+    AccountCreateForm.fromRequest.fold(
       form => BadRequest(views.html.account.create(form)),
       data => {
         accountDao.findByEmail(data.email).map { _ =>

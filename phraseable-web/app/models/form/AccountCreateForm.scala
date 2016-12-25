@@ -1,32 +1,25 @@
 package models.form
 
+import org.apache.commons.lang3.StringUtils
 import play.api.data.Forms._
 import play.api.data._
 import play.api.data.format.Formats._
-import play.api.data.validation.Constraints._
 
 case class AccountCreateForm(email: String, password: String)
 
-object AccountCreateForm {
+object AccountCreateForm extends NormalizationSupport {
+
+  import ConstraintHelper._
 
   private val form = Form(
     mapping(
-      "email" -> text.verifying(emailAddress),
+      "email" -> text.verifying(email("AccountCreateForm.error.email")),
       "password" -> tuple(
-        "main" -> text.verifying(
-          "AccountCreateForm.error.password",
-          _.matches( """^.{8,64}$""")
-        ),
+        "main" -> text.verifying(password("AccountCreateForm.error.password")),
         "confirmation" -> text
-      ).verifying(
-        "AccountCreateForm.error.retypedPassword",
-        passwords => passwords._1 == passwords._2
-      ),
+      ).verifying(sameValue("AccountCreateForm.error.retypedPassword")),
       "uniqueEmail" -> default(of[Boolean], true).verifying(
-        "AccountCreateForm.error.uniqueEmail",
-        _ == true
-      )
-
+        passed("AccountCreateForm.error.uniqueEmail"))
     ) { (email, passwords, _) =>
       AccountCreateForm(email, passwords._1)
     } { a =>
@@ -35,4 +28,14 @@ object AccountCreateForm {
   )
 
   def defaultForm: Form[AccountCreateForm] = form
+
+  def fromRequest(implicit request: play.api.mvc.Request[_]): Form[AccountCreateForm] =
+    form.bindFromRequest(normalizeRequest(request))
+
+  override def normalize(data: Map[String, Seq[String]]): Map[String, Seq[String]] = {
+    // Trim white spaces
+    Seq("email", "password.main", "password.confirmation").foldRight(data) { (x, acc) =>
+      acc.updated(x, data(x).map(StringUtils.stripToEmpty))
+    }
+  }
 }
