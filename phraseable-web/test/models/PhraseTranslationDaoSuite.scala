@@ -16,13 +16,13 @@ class PhraseTranslationDaoSuite extends FunSuite {
       val phraseTranslationDao = new PhraseTranslationDao(db, createClock(t))
 
       val rows = Seq(
-        PhraseTranslation(1L, 2L, "ja_JP", "translation")
+        PhraseTranslation(1L, 2L, "en", "translation", "desc")
       )
       rows.foreach(phraseTranslationDao.create(_))
 
       val date = Some(new java.util.Date(t))
       val inserted = Seq(
-        PhraseTranslation(1L, 2L, "ja_JP", "translation", date, date)
+        PhraseTranslation(1L, 2L, "en", "translation", "desc", date, date)
       )
 
       assert(phraseTranslationDao.find(0L) === None)

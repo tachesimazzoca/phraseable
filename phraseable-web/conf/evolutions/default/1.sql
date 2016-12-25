@@ -53,6 +53,7 @@ CREATE TABLE `phrase_translation` (
   `phrase_id` BIGINT NOT NULL,
   `locale` CHAR(5) NOT NULL,
   `content` TEXT,
+  `description` TEXT,
   `created_at` TIMESTAMP,
   `updated_at` TIMESTAMP,
   PRIMARY KEY (`id`)
