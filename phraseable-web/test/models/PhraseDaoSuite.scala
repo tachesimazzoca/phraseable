@@ -16,13 +16,13 @@ class PhraseDaoSuite extends FunSuite {
       val phraseDao = new PhraseDao(db, createClock(t))
 
       val rows = Seq(
-        Phrase(1L, "go to <A>", "desc")
+        Phrase(1L, Phrase.Lang.English, "go to [A]", "desc")
       )
       rows.foreach(phraseDao.create(_))
 
       val date = Some(new java.util.Date(t))
       val inserted = Seq(
-        Phrase(1L, "go to <A>", "desc", date, date)
+        Phrase(1L, Phrase.Lang.English, "go to [A]", "desc", date, date)
       )
 
       assert(phraseDao.find(0L) === None)

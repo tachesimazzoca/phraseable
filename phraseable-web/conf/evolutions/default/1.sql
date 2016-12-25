@@ -24,7 +24,6 @@ CREATE TABLE `id_sequence` (
 );
 INSERT INTO `id_sequence` VALUES ('account', 0);
 INSERT INTO `id_sequence` VALUES ('phrase', 0);
-INSERT INTO `id_sequence` VALUES ('phrase_translation', 0);
 INSERT INTO `id_sequence` VALUES ('category', 0);
 
 CREATE TABLE `account` (
@@ -41,25 +40,13 @@ CREATE INDEX `idx_account_01` ON `account` (`email`);
 
 CREATE TABLE `phrase` (
   `id` BIGINT NOT NULL,
+  `lang` CHAR(2) NOT NULL,
   `content` TEXT,
   `description` TEXT,
   `created_at` TIMESTAMP,
   `updated_at` TIMESTAMP,
   PRIMARY KEY (`id`)
 );
-
-CREATE TABLE `phrase_translation` (
-  `id` BIGINT NOT NULL,
-  `phrase_id` BIGINT NOT NULL,
-  `locale` CHAR(5) NOT NULL,
-  `content` TEXT,
-  `description` TEXT,
-  `created_at` TIMESTAMP,
-  `updated_at` TIMESTAMP,
-  PRIMARY KEY (`id`)
-);
-CREATE INDEX `idx_phrase_translation_01` ON `phrase_translation` (`phrase_id`);
-CREATE INDEX `idx_phrase_translation_02` ON `phrase_translation` (`locale`);
 
 CREATE TABLE `category` (
   `id` BIGINT NOT NULL,
@@ -83,6 +70,5 @@ DROP TABLE `verification_storage`;
 DROP TABLE `id_sequence`;
 DROP TABLE `account`;
 DROP TABLE `phrase`;
-DROP TABLE `phrase_translation`;
 DROP TABLE `category`;
 DROP TABLE `rel_phrase_category`;
