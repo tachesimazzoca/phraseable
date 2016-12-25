@@ -9,6 +9,7 @@ case class PhraseEditForm(
   id: Option[Long],
   lang: String,
   content: String,
+  definition: String,
   description: String
 )
 
@@ -23,6 +24,7 @@ object PhraseEditForm extends NormalizationSupport {
       "id" -> optional(of[Long]),
       "lang" -> text.verifying(nonBlank("PhraseEditForm.error.lang")),
       "content" -> text.verifying(nonBlank("PhraseEditForm.error.content")),
+      "definition" -> text,
       "description" -> text
     )(PhraseEditForm.apply)(PhraseEditForm.unapply)
   )

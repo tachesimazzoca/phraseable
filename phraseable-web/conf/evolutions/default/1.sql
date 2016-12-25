@@ -42,6 +42,7 @@ CREATE TABLE `phrase` (
   `id` BIGINT NOT NULL,
   `lang` CHAR(2) NOT NULL,
   `content` TEXT,
+  `definition` TEXT,
   `description` TEXT,
   `created_at` TIMESTAMP,
   `updated_at` TIMESTAMP,

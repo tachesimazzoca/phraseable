@@ -27,7 +27,9 @@ class PhraseController @Inject() (
     id.map { phraseId =>
       phraseDao.find(phraseId).map { phrase =>
         val data = PhraseEditForm(
-          Some(phrase.id), phrase.lang.name, phrase.content, phrase.description)
+          Some(phrase.id), phrase.lang.name, phrase.content,
+          phrase.definition, phrase.description
+        )
         Ok(views.html.phrase.edit(PhraseEditForm.defaultForm.fill(data), flash))
       }.getOrElse {
         NotFound
@@ -48,6 +50,7 @@ class PhraseController @Inject() (
               phrase.copy(
                 lang = Phrase.Lang.fromName(data.lang),
                 content = data.content,
+                definition = data.definition,
                 description = data.description
               )
             )
@@ -63,7 +66,7 @@ class PhraseController @Inject() (
           val phraseId = idSequenceDao.nextId(IdSequence.SequenceType.Phrase)
           val phrase = phraseDao.create(
             Phrase(phraseId, Phrase.Lang.fromName(data.lang),
-              data.content, data.description)
+              data.content, data.definition, data.description)
           )
           Redirect(routes.PhraseController.edit(Some(phrase.id)))
             .flashing(FLASH_POST_EDIT -> "created")

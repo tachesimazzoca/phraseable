@@ -4,6 +4,7 @@ case class Phrase(
   id: Long,
   lang: Phrase.Lang,
   content: String,
+  definition: String,
   description: String,
   createdAt: Option[java.util.Date] = None,
   updatedAt: Option[java.util.Date] = None
