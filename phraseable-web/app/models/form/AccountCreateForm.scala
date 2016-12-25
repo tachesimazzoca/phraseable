@@ -30,7 +30,7 @@ object AccountCreateForm extends NormalizationSupport {
   def defaultForm: Form[AccountCreateForm] = form
 
   def fromRequest(implicit request: play.api.mvc.Request[_]): Form[AccountCreateForm] =
-    form.bindFromRequest(normalizeRequest(request))
+    form.bindFromRequest(normalize(request))
 
   override def normalize(data: Map[String, Seq[String]]): Map[String, Seq[String]] = {
     // Trim white spaces

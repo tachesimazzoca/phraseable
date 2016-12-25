@@ -27,7 +27,7 @@ object AccountLoginForm extends NormalizationSupport {
   def defaultForm: Form[AccountLoginForm] = form
 
   def fromRequest(implicit request: play.api.mvc.Request[_]): Form[AccountLoginForm] =
-    form.bindFromRequest(normalizeRequest(request))
+    form.bindFromRequest(normalize(request))
 
   override def normalize(data: Map[String, Seq[String]]): Map[String, Seq[String]] = {
     // Trim white spaces
