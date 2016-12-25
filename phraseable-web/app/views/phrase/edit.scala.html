@@ -1,0 +1,44 @@
+@(form: Form[models.form.PhraseEditForm], flash: Option[String] = None)(implicit messages: Messages)
+
+@import _helpers.default._
+@import play.api.i18n.Messages
+
+@_layouts.default(Some("Editing Phrase")) {
+
+  @if(flash.isDefined) {
+    <div class="alert alert-success" data-role="flash">Your phrase has been saved successfully.</div>
+  }
+
+  @if(form.hasErrors) {
+    <div class="alert alert-danger">
+      <ul>
+        @form.errors.map { err =>
+          <li>@Messages(err.message, err.args: _*)</li>
+        }
+      </ul>
+    </div>
+  }
+
+  <div style="width: 600px">
+    @helper.form(routes.PhraseController.postEdit()) {
+      @toHtmlInput(form("id"), 'type -> "hidden")
+      <div class="form-group">
+        <label>Lang</label>
+        <select name="lang" class="form-control" style="width: 200px">
+          @toHtmlOption(form("lang"), models.form.PhraseEditForm.langMap)
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Content</label>
+        @toHtmlInput(form("content"), 'class -> "form-control")
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        @toHtmlTextarea(form("description"), 'class -> "form-control")
+      </div>
+      <div>
+        <input type="submit" value="Submit" class="btn btn-success">
+      </div>
+    }
+  </div>
+}

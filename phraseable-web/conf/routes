@@ -15,4 +15,8 @@ GET     /account/error/*name                     controllers.AccountController.e
 
 GET     /dashboard                               controllers.DashboardController.index()
 
+GET     /phrase                                  controllers.PhraseController.index()
+GET     /phrase/edit                             controllers.PhraseController.edit(id: Option[Long])
+POST    /phrase/edit                             controllers.PhraseController.postEdit()
+
 GET     /*file                                   controllers.Assets.at(path="/public", file)

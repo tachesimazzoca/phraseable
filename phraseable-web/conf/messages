@@ -4,3 +4,6 @@ AccountCreateForm.error.email=E-mail Address must be a valid e-mail address.
 AccountCreateForm.error.password=Password must be more than 8 ASCII characters.
 AccountCreateForm.error.retypedPassword=Re-typed Password must be equal to the Password.
 AccountCreateForm.error.uniqueEmail=The given E-mail Address has been registered.
+
+PhraseEditForm.error.lang=Lang must not be selected.
+PhraseEditForm.error.content=Content must not be blank.

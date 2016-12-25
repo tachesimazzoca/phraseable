@@ -1,0 +1,7 @@
+@(field: play.api.data.Field, options: Map[String, String])
+
+@options.map { option =>
+  <option value="@option._1"@{
+    if (option._1.equals(field.value.getOrElse(""))) Html(""" selected="selected"""")
+  }>@option._2</option>
+}
