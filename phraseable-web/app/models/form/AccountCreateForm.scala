@@ -1,6 +1,5 @@
 package models.form
 
-import org.apache.commons.lang3.StringUtils
 import play.api.data.Forms._
 import play.api.data._
 import play.api.data.format.Formats._
@@ -10,6 +9,9 @@ case class AccountCreateForm(email: String, password: String)
 object AccountCreateForm extends NormalizationSupport {
 
   import ConstraintHelper._
+
+  override val nonBlankFields: Seq[String] =
+    Seq("email", "password.main", "password.confirmation")
 
   private val form = Form(
     mapping(
@@ -31,11 +33,4 @@ object AccountCreateForm extends NormalizationSupport {
 
   def fromRequest(implicit request: play.api.mvc.Request[_]): Form[AccountCreateForm] =
     form.bindFromRequest(normalize(request))
-
-  override def normalize(data: Map[String, Seq[String]]): Map[String, Seq[String]] = {
-    // Trim white spaces
-    Seq("email", "password.main", "password.confirmation").foldRight(data) { (x, acc) =>
-      acc.updated(x, data(x).map(StringUtils.stripToEmpty))
-    }
-  }
 }
