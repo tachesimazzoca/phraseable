@@ -17,10 +17,14 @@ class UserAction @Inject() (
     block: (UserRequest[A]) => Future[Result]
   ): Future[Result] = {
 
-    val userRequest = request.cookies.get(sessionIdKey).map { cookie =>
+    val userRequest = request.cookies.get(sessionIdKey).flatMap { cookie =>
       val sessId = cookie.value
-      // TODO: Regenerate sessionId
-      new UserRequest(sessId, userSessionStorage.read(sessId), request)
+      userSessionStorage.read(sessId).map { data =>
+        userSessionStorage.update(sessId, data)
+        Some(new UserRequest(sessId, Some(data), request))
+      }.getOrElse {
+        None
+      }
     }.getOrElse {
       new UserRequest(userSessionStorage.create(), None, request)
     }
