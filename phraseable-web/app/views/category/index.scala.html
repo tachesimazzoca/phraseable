@@ -1,20 +1,18 @@
 @(pagination: components.util.Pagination[models.CategorySelect])
 
+@import _helpers.default._
+
 @_layouts.default(Some("Listing Category")) {
   <table class="table">
-    <tr>
-      <th>#</th>
-      <th>Title</th>
-      <th>Count</th>
-    </tr>
     @pagination.rows.map { row =>
       <tr>
-        <td>@row.id</td>
         <td>
-          <a href="@routes.CategoryController.detail(row.id)">@{row.title}</a>
+          <a href="@routes.CategoryController.detail(row.id)">@{row.title} (@{"%,3d".format(row.phraseCount).trim})</a>
         </td>
-        <td align="right">@{"%,3d".format(row.phraseCount).trim}</td>
+        <td align="right">@{"%,3d".format(row.phraseCount).trim} phrase(s)</td>
       </tr>
     }
   </table>
+
+  @pager(pagination, routes.CategoryController.index().path())
 }
