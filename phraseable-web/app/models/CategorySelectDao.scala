@@ -85,7 +85,7 @@ class CategorySelectDao @Inject() (
     offset: Long, limit: Long, orderBy: Option[OrderBy]
   ): Pagination[CategorySelect] = db.withConnection { implicit conn =>
 
-    val titleLike = keyword.map(x => "${x}%").getOrElse("%")
+    val titleLike = keyword.map(x => s"${x}%").getOrElse("%")
     val orderByClause = orderBy.getOrElse(OrderBy.TitleAsc).clause
 
     Pagination.paginate(offset, limit,
