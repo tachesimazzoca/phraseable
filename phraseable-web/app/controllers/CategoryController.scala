@@ -15,12 +15,17 @@ class CategoryController @Inject() (
   phraseDao: PhraseDao,
   categoryDao: CategoryDao,
   relPhraseCategoryDao: RelPhraseCategoryDao,
+  categorySelectDao: CategorySelectDao,
   val messagesApi: MessagesApi
 ) extends Controller with I18nSupport {
 
   private val FLASH_POST_EDIT = "CategoryController.postEdit"
 
-  def index = TODO
+  def index() = userAction {
+    val pagination = categorySelectDao.selectCategories(
+      "", 0, 10, CategorySelectDao.OrderBy.TitleAsc)
+    Ok(views.html.category.index(pagination))
+  }
 
   def detail(id: Long) = userAction {
     categoryDao.find(id).map { category =>
