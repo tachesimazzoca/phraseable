@@ -13,6 +13,8 @@ case class CategorySearchForm(
 
 object CategorySearchForm extends NormalizationSupport {
 
+  override val nonBlankFields: Seq[String] = Seq("q")
+
   private val form = Form(
     mapping(
       "q" -> optional(text),
