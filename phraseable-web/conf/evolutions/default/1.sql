@@ -60,7 +60,8 @@ CREATE TABLE `category` (
 
 CREATE TABLE `rel_phrase_category` (
   `phrase_id` BIGINT NOT NULL,
-  `category_id` BIGINT NOT NULL
+  `category_id` BIGINT NOT NULL,
+  `priority` INT NOT NULL
 );
 CREATE INDEX `idx_rel_phrase_category_01` ON `rel_phrase_category` (`phrase_id`);
 CREATE INDEX `idx_rel_phrase_category_02` ON `rel_phrase_category` (`category_id`);

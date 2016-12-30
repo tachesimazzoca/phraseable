@@ -29,4 +29,38 @@ class CategoryDaoSuite extends FunSuite {
       assert(categoryDao.find(1L) === Some(inserted(0)))
     }
   }
+
+  test("selectByPhraseId") {
+    withTestDatabase() { db =>
+      val t = System.currentTimeMillis
+      val categoryDao = new CategoryDao(db, createClock(t))
+      val relPhraseCategoryDao = new RelPhraseCategoryDao(db)
+
+      val rows = Seq(
+        Category(1L, "cat1", "desc1"),
+        Category(2L, "cat2", "desc2"),
+        Category(3L, "cat3", "desc3")
+      )
+      rows.foreach(categoryDao.create(_))
+      relPhraseCategoryDao.updateByPhraseId(1L, Seq(3L, 1L))
+
+      assert(Seq("cat3", "cat1") === categoryDao.selectByPhraseId(1L).map(_.title),
+        "CategoryDao#selectByPhraseId must returns rows in registered order")
+    }
+  }
+
+  test("findByTitle") {
+    withTestDatabase() { db =>
+      val t = System.currentTimeMillis
+      val categoryDao = new CategoryDao(db, createClock(t))
+
+      val rows = Seq(
+        Category(1L, "cat1", "desc1"),
+        Category(2L, "cat2", "desc2")
+      )
+      rows.foreach(categoryDao.create(_))
+
+      assert(2L === categoryDao.findByTitle("cat2").get.id)
+    }
+  }
 }

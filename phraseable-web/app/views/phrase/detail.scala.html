@@ -1,8 +1,25 @@
-@(phrase: models.Phrase)
+@(phrase: models.Phrase, categories: Seq[models.Category] = Seq.empty)
 
 @import _helpers.markdown._
 
 @_layouts.default(Some(phrase.content)) {
   <p>@phrase.definition</p>
+
+  <h3>Description</h3>
   <div>@Html(md2html(phrase.description))</div>
+
+  @if(!categories.isEmpty) {
+    <h3>Tags</h3>
+    <ul>
+    @categories.map { category =>
+      <li><a href="">@category.title</a></li>
+    }
+    </ul>
+  }
+
+  <div class="form-group">
+    <div class="pull-right">
+      <a class="btn btn-default" href="@routes.PhraseController.edit(Some(phrase.id))">Edit</a>
+    </div>
+  </div>
 }

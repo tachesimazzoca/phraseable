@@ -51,4 +51,24 @@ class CategoryDao @Inject() (
       updatedAt = Some(new java.util.Date(t))
     )
   }
+
+  private val selectByPhraseIdQuery = SQL(
+    """
+    SELECT a.* FROM category AS a, rel_phrase_category AS b
+    WHERE a.id = b.category_id AND b.phrase_id = {phraseId}
+    ORDER BY b.priority
+    """
+  )
+
+  def selectByPhraseId(phraseId: Long): Seq[Category] =
+    db.withConnection { implicit conn =>
+      selectByPhraseIdQuery.on('phraseId -> phraseId).as(rowParser.*)
+    }
+
+  private val findByTitleQuery = SQL("SELECT * FROM category WHERE title = {title}")
+
+  def findByTitle(title: String): Option[Category] =
+    db.withConnection { implicit conn =>
+      findByTitleQuery.on('title -> title).as(rowParser.singleOpt)
+    }
 }
