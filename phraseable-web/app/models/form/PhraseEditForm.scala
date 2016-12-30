@@ -48,7 +48,7 @@ object PhraseEditForm extends NormalizationSupport {
     }
   )
 
-  val langMap = Phrase.Lang.supportedLanguages.map(x => (x.name, x.value)).toMap
+  val langOptions = Phrase.Lang.supportedLanguages.map(x => (x.name, x.value))
 
   def defaultForm: Form[PhraseEditForm] = form
 

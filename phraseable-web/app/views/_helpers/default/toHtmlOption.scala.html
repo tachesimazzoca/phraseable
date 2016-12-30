@@ -1,7 +1,7 @@
-@(field: play.api.data.Field, options: Map[String, String])
+@(field: play.api.data.Field, options: Seq[(String, String)])
 
-@options.map { option =>
-  <option value="@option._1"@{
-    if (option._1.equals(field.value.getOrElse(""))) Html(""" selected="selected"""")
-  }>@option._2</option>
+@options.map { case (k, v) =>
+  <option value="@k"@{
+    if (k.equals(field.value.getOrElse(""))) Html(""" selected="selected"""")
+  }>@v</option>
 }

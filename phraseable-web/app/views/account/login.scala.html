@@ -5,31 +5,31 @@
 
 @_layouts.default(Some("Sign In")) {
 
-@if(form.hasErrors) {
-<div class="alert alert-danger">
-    <ul>
-        @form.errors.map { err =>
+  @if(form.hasErrors) {
+    <div class="alert alert-danger">
+      <ul>
+      @form.errors.map { err =>
         <li>@Messages(err.message, err.args: _*)</li>
-        }
-    </ul>
-</div>
-}
+      }
+      </ul>
+    </div>
+  }
 
-<div style="width: 400px; margin: 0 auto">
+  <div style="width: 400px; margin: 0 auto">
     @helper.form(routes.AccountController.postLogin()) {
     <div class="well">
-        <div class="form-group">
-            <label>E-mail Address</label>
-            @toHtmlInput(form("email"), 'class -> "form-control")
-        </div>
-        <div class="form-group">
-            <label>Password</label>
-            @toHtmlInput(form("password"), 'type -> "password", 'class -> "form-control")
-        </div>
-        <div>
-            <input type="submit" value="Sign In" class="btn btn-success">
-        </div>
+      <div class="form-group">
+        <label>E-mail Address</label>
+        @toHtmlInput(form("email"), 'class -> "form-control")
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        @toHtmlInput(form("password"), 'type -> "password", 'class -> "form-control")
+      </div>
+      <div>
+        <input type="submit" value="Sign In" class="btn btn-success">
+      </div>
     </div>
     }
-</div>
+  </div>
 }

@@ -12,9 +12,9 @@
   @if(form.hasErrors) {
     <div class="alert alert-danger">
       <ul>
-        @form.errors.map { err =>
-          <li>@Messages(err.message, err.args: _*)</li>
-        }
+      @for(err <- form.errors) {
+        <li>@Messages(err.message, err.args: _*)</li>
+      }
       </ul>
     </div>
   }
