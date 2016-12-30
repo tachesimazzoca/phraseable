@@ -18,5 +18,6 @@ GET     /dashboard                               controllers.DashboardController
 GET     /phrase                                  controllers.PhraseController.index()
 GET     /phrase/edit                             controllers.PhraseController.edit(id: Option[Long])
 POST    /phrase/edit                             controllers.PhraseController.postEdit()
+GET     /phrase/:id                              controllers.PhraseController.detail(id: Long)
 
 GET     /*file                                   controllers.Assets.at(path="/public", file)

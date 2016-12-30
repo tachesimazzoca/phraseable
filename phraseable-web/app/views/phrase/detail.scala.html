@@ -1,0 +1,8 @@
+@(phrase: models.Phrase)
+
+@import _helpers.markdown._
+
+@_layouts.default(Some(phrase.content)) {
+  <p>@phrase.definition</p>
+  <div>@Html(md2html(phrase.description))</div>
+}

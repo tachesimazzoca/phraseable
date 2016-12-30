@@ -20,6 +20,14 @@ class PhraseController @Inject() (
 
   def index = TODO
 
+  def detail(id: Long) = userAction {
+    phraseDao.find(id).map { phrase =>
+      Ok(views.html.phrase.detail(phrase))
+    }.getOrElse {
+      NotFound
+    }
+  }
+
   def edit(id: Option[Long]) = (userAction andThen memberAction) { implicit request =>
 
     val flash = request.flash.data.get(FLASH_POST_EDIT)
