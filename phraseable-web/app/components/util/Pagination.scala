@@ -22,7 +22,7 @@ object Pagination {
     if (c == 0) {
       Pagination(Seq.empty[T], 0, limit, 0)
     } else {
-      val first = if (offset >= c) ((c - 1) * limit) / limit else 0
+      val first = if (offset >= c) ((c - 1) * limit) / limit else offset
       Pagination(select(first, limit), first, limit, c)
     }
   }
