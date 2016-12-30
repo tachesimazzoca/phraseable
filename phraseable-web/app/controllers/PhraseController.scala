@@ -47,7 +47,7 @@ class PhraseController @Inject() (
         NotFound
       }
     }.getOrElse {
-      Ok(views.html.phrase.edit(PhraseEditForm.defaultForm, flash))
+      Ok(views.html.phrase.edit(PhraseEditForm.defaultForm))
     }
   }
 

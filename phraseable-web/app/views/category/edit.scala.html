@@ -1,0 +1,43 @@
+@(form: Form[models.form.CategoryEditForm], flash: Option[String] = None)(implicit messages: Messages)
+
+@import _helpers.default._
+@import play.api.i18n.Messages
+
+@_layouts.default(Some("Editing Category")) {
+
+  @if(flash.isDefined) {
+    <div class="alert alert-success" data-role="flash">This entry has been saved successfully.</div>
+  }
+
+  @if(form.hasErrors) {
+    <div class="alert alert-danger">
+      <ul>
+        @form.errors.map { err =>
+          <li>@Messages(err.message, err.args: _*)</li>
+        }
+      </ul>
+    </div>
+  }
+
+  <div style="width: 600px">
+    @helper.form(routes.CategoryController.postEdit()) {
+      @toHtmlInput(form("id"), 'type -> "hidden")
+      <div class="form-group">
+        <label>Title</label>
+        @toHtmlInput(form("title"), 'class -> "form-control")
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        @toHtmlTextarea(form("description"), 'class -> "form-control")
+      </div>
+      <div class="form-group">
+        <div class="form-inline">
+          <input type="submit" value="Submit" class="btn btn-success">
+          @form("id").value.map { id =>
+            <a class="btn btn-default" href="@routes.CategoryController.detail(id.toLong)">View</a>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

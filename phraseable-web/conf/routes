@@ -20,4 +20,8 @@ GET     /phrase/edit                             controllers.PhraseController.ed
 POST    /phrase/edit                             controllers.PhraseController.postEdit()
 GET     /phrase/:id                              controllers.PhraseController.detail(id: Long)
 
+GET     /category/edit                           controllers.CategoryController.edit(id: Option[Long])
+POST    /category/edit                           controllers.CategoryController.postEdit()
+GET     /category/:id                            controllers.CategoryController.detail(id: Long)
+
 GET     /*file                                   controllers.Assets.at(path="/public", file)

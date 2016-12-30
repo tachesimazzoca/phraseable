@@ -7,3 +7,5 @@ AccountCreateForm.error.uniqueEmail=The given E-mail Address has been registered
 
 PhraseEditForm.error.lang=Lang must not be selected.
 PhraseEditForm.error.content=Content must not be blank.
+
+CategoryEditForm.error.title=Title must not be blank.

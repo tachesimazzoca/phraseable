@@ -1,0 +1,14 @@
+@(category: models.Category)
+
+@import _helpers.markdown._
+
+@_layouts.default(Some(category.title)) {
+
+  <div class="form-group">
+    <div class="pull-right">
+      <a class="btn btn-default" href="@routes.CategoryController.edit(Some(category.id))">Edit</a>
+    </div>
+  </div>
+
+  <div>@Html(md2html(category.description))</div>
+}
