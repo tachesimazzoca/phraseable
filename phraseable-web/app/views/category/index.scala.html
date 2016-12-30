@@ -5,13 +5,15 @@
     <tr>
       <th>#</th>
       <th>Title</th>
+      <th>Count</th>
     </tr>
     @pagination.rows.map { row =>
       <tr>
         <td>@row.id</td>
         <td>
-          <a href="@routes.CategoryController.detail(row.id)">@{row.title} (@{"%,3d".format(row.phraseCount).trim})</a>
+          <a href="@routes.CategoryController.detail(row.id)">@{row.title}</a>
         </td>
+        <td align="right">@{"%,3d".format(row.phraseCount).trim}</td>
       </tr>
     }
   </table>

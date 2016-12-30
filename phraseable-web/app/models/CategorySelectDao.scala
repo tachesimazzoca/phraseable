@@ -81,17 +81,18 @@ class CategorySelectDao @Inject() (
   }
 
   def selectCategories(
-    q: String, offset: Long, limit: Long,
-    orderBy: OrderBy
+    keyword: Option[String],
+    offset: Long, limit: Long, orderBy: Option[OrderBy]
   ): Pagination[CategorySelect] = db.withConnection { implicit conn =>
 
-    val titleLike = s"${q}%"
+    val titleLike = keyword.map(x => "${x}%").getOrElse("%")
+    val orderByClause = orderBy.getOrElse(OrderBy.TitleAsc).clause
 
     Pagination.paginate(offset, limit,
       count = () =>
         countCategoriesQuery.on('titleLike -> titleLike).as(SqlParser.get[Long]("c").single),
       select = (theOffset, theLimit) => {
-        selectCategoriesQuery(orderBy.clause).on(
+        selectCategoriesQuery(orderByClause).on(
           'titleLike -> titleLike,
           'offset -> theOffset,
           'limit -> theLimit

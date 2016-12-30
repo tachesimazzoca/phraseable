@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import controllers.action.{MemberAction, UserAction}
 import models._
-import models.form.CategoryEditForm
+import models.form.{CategoryEditForm, CategorySearchForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Controller
 
@@ -21,10 +21,26 @@ class CategoryController @Inject() (
 
   private val FLASH_POST_EDIT = "CategoryController.postEdit"
 
-  def index() = userAction {
-    val pagination = categorySelectDao.selectCategories(
-      "", 0, 10, CategorySelectDao.OrderBy.TitleAsc)
-    Ok(views.html.category.index(pagination))
+  private val DEFAULT_CATEGORY_SELECT_ORDER_BY = CategorySelectDao.OrderBy.TitleAsc
+
+  private val supportedOrderByMap = Map(
+    "id_asc" -> CategorySelectDao.OrderBy.IdAsc,
+    "title_asc" -> CategorySelectDao.OrderBy.TitleAsc,
+    "phase_count_desc" -> CategorySelectDao.OrderBy.PhraseCountDesc
+  )
+
+  def index() = userAction { implicit userRequest =>
+    CategorySearchForm.fromRequest.fold(
+      form => BadRequest,
+      data => {
+        val pagination = categorySelectDao.selectCategories(
+          data.keyword,
+          data.offset.getOrElse(0),
+          data.limit.getOrElse(10),
+          data.orderBy.map(supportedOrderByMap))
+        Ok(views.html.category.index(pagination))
+      }
+    )
   }
 
   def detail(id: Long) = userAction {
