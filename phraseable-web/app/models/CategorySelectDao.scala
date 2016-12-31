@@ -37,36 +37,36 @@ class CategorySelectDao @Inject() (
 
   private val countCategoriesQuery = SQL(
     """
-       SELECT
-         COUNT(*)
-       FROM
-         category
-       WHERE
-         title LIKE {titleLike}
+    SELECT
+      COUNT(*)
+    FROM
+      category
+    WHERE
+      title LIKE {titleLike}
     """
   )
 
   private def selectCategoriesQuery(orderBy: String) = SQL(
     s"""
-       SELECT
-         a.id AS id,
-         a.title AS title,
-         a.description AS description,
-         IFNULL(b.phrase_count, 0) AS phrase_count
-       FROM
-         category AS a
-       LEFT JOIN (
-         SELECT
-           category_id,
-           COUNT(phrase_id) AS phrase_count
-         FROM rel_phrase_category
-         GROUP BY category_id
-       ) AS b
-       ON b.category_id = a.id
-       WHERE
-         a.title LIKE {titleLike}
-       ORDER BY ${orderBy}
-       LIMIT {offset}, {limit}
+    SELECT
+      a.id AS id,
+      a.title AS title,
+      a.description AS description,
+      IFNULL(b.phrase_count, 0) AS phrase_count
+    FROM
+      category AS a
+    LEFT JOIN (
+      SELECT
+        category_id,
+        COUNT(phrase_id) AS phrase_count
+      FROM rel_phrase_category
+      GROUP BY category_id
+    ) AS b
+    ON b.category_id = a.id
+    WHERE
+      a.title LIKE {titleLike}
+    ORDER BY ${orderBy}
+    LIMIT {offset}, {limit}
     """
   )
 
