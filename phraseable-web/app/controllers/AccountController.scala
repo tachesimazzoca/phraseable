@@ -4,9 +4,9 @@ import javax.inject.{Inject, Named}
 
 import components.storage.Storage
 import controllers.action.UserAction
+import controllers.session.UserSessionFactory
 import models._
 import models.form._
-import models.storage.{UserSession, UserSessionStorage}
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
@@ -14,7 +14,7 @@ import play.api.mvc._
 class AccountController @Inject() (
   userAction: UserAction,
   @Named("verificationStorage") verificationStorage: Storage,
-  userSessionStorage: UserSessionStorage,
+  userSessionFactory: UserSessionFactory,
   idSequenceDao: IdSequenceDao,
   accountDao: AccountDao,
   val messagesApi: MessagesApi
@@ -25,12 +25,15 @@ class AccountController @Inject() (
   private val accountLoginForm = AccountLoginForm.defaultForm
   private val accountCreateForm = AccountCreateForm.defaultForm
 
+  lazy private val userLoginSession =
+    userSessionFactory.createUserLoginSession()
+
   def login = userAction { implicit request =>
     Ok(views.html.account.login(accountLoginForm))
   }
 
   def postLogin = userAction { implicit request =>
-    userSessionStorage.delete(request.sessionId)
+    userLoginSession.delete(request.sessionId)
     AccountLoginForm.fromRequest.fold(
       form => BadRequest(views.html.account.login(form)),
       data => {
@@ -38,9 +41,7 @@ class AccountController @Inject() (
           a <- accountDao.findByEmail(data.email)
           if (a.status == Account.Status.Active && a.password.matches(data.password))
         } yield a).map { account =>
-          val sessData = userSessionStorage.read(request.sessionId).getOrElse(UserSession.defaultData)
-          userSessionStorage.update(
-            request.sessionId, sessData.copy(accountId = Some(account.id)))
+          userLoginSession.update(request.sessionId, Map("accountId" -> account.id.toString))
           Redirect(routes.DashboardController.index())
         }.getOrElse {
           BadRequest(views.html.account.login(AccountLoginForm.deauthorize(data)))
@@ -50,7 +51,7 @@ class AccountController @Inject() (
   }
 
   def logout = userAction { implicit request =>
-    userSessionStorage.delete(request.sessionId)
+    userLoginSession.delete(request.sessionId)
     Redirect(routes.AccountController.login())
   }
 

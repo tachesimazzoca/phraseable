@@ -65,6 +65,16 @@ class Storage(engine: StorageEngine, settings: Storage.Settings = Storage.Settin
     engine.delete(key)
   }
 
+  def touch(key: String): String = {
+    gc()
+    engine.read(key).map { bytes =>
+      engine.write(key, bytes)
+      key
+    }.getOrElse {
+      create()
+    }
+  }
+
   def gc(): Unit = settings.gcMaxLifetime.foreach { lifetime =>
     if (settings.gcChance.yes()) {
       engine.gc(lifetime)
