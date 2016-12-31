@@ -38,7 +38,7 @@ class CategorySelectDao @Inject() (
   private val countCategoriesQuery = SQL(
     """
        SELECT
-         COUNT(*) AS c
+         COUNT(*)
        FROM
          category
        WHERE
@@ -90,7 +90,7 @@ class CategorySelectDao @Inject() (
 
     Pagination.paginate(offset, limit,
       count = () =>
-        countCategoriesQuery.on('titleLike -> titleLike).as(SqlParser.get[Long]("c").single),
+        countCategoriesQuery.on('titleLike -> titleLike).as(SqlParser.get[Long](1).single),
       select = (theOffset, theLimit) => {
         selectCategoriesQuery(orderByClause).on(
           'titleLike -> titleLike,
