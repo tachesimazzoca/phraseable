@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
+import components.util.Pagination
 import controllers.action.{MemberAction, UserAction}
 import models._
 import models.form.{CategoryEditForm, CategorySearchForm}
@@ -12,7 +13,7 @@ class CategoryController @Inject() (
   userAction: UserAction,
   memberAction: MemberAction,
   idSequenceDao: IdSequenceDao,
-  phraseDao: PhraseDao,
+  phraseSelectDao: PhraseSelectDao,
   categoryDao: CategoryDao,
   relPhraseCategoryDao: RelPhraseCategoryDao,
   categorySelectDao: CategorySelectDao,
@@ -22,6 +23,8 @@ class CategoryController @Inject() (
   private val FLASH_POST_EDIT = "CategoryController.postEdit"
 
   private val DEFAULT_CATEGORY_SELECT_ORDER_BY = CategorySelectDao.OrderBy.TitleAsc
+
+  private val DEFAULT_PHRASE_SELECT_LIMIT = 1000
 
   private val supportedOrderByMap = Map(
     "id_asc" -> CategorySelectDao.OrderBy.IdAsc,
@@ -43,9 +46,11 @@ class CategoryController @Inject() (
     )
   }
 
-  def detail(id: Long) = userAction {
+  def detail(id: Long) = userAction { implicit userRequest =>
     categoryDao.find(id).map { category =>
-      Ok(views.html.category.detail(category))
+      val pagination = phraseSelectDao.selectByCondition(
+        PhraseSelectDao.Condition(Some(category.id), None), 0, DEFAULT_PHRASE_SELECT_LIMIT, None)
+      Ok(views.html.category.detail(category, pagination))
     }.getOrElse {
       NotFound
     }

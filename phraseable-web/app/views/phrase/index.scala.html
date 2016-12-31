@@ -1,0 +1,23 @@
+@(phraseSelectPagination: components.util.Pagination[models.PhraseSelect])
+
+@import _helpers.default._
+
+@_layouts.default(Some("Listing Phrases")) {
+
+  @if(!phraseSelectPagination.rows.isEmpty) {
+    <table class="table">
+      <tr>
+        <th>Content</th>
+        <th>Definition</th>
+      </tr>
+      @for(row <- phraseSelectPagination.rows) {
+        <tr>
+          <td><a href="@routes.PhraseController.detail(row.id)">@row.content</a></td>
+          <td>@row.definition</td>
+        </tr>
+      }
+    </table>
+
+    @pager(phraseSelectPagination, routes.PhraseController.index().path())
+  }
+}

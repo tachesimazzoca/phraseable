@@ -3,8 +3,9 @@ package controllers
 import javax.inject.Inject
 
 import controllers.action.{MemberAction, UserAction}
-import models.form.PhraseEditForm
+import controllers.session.UserSessionFactory
 import models._
+import models.form.{PhraseEditForm, PhraseSearchForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Controller
 
@@ -15,12 +16,50 @@ class PhraseController @Inject() (
   phraseDao: PhraseDao,
   categoryDao: CategoryDao,
   relPhraseCategoryDao: RelPhraseCategoryDao,
+  phraseSelectDao: PhraseSelectDao,
+  userSessionFactory: UserSessionFactory,
   val messagesApi: MessagesApi
 ) extends Controller with I18nSupport {
 
   private val FLASH_POST_EDIT = "PhraseController.postEdit"
 
-  def index = TODO
+  private val DEFAULT_PHRASE_SELECT_LIMIT = 20
+
+  lazy private val phraseSearchSession = userSessionFactory.create("PhraseSearch")
+
+  def index() = userAction { implicit userRequest =>
+    // Bind session and request parameters
+    val m = Seq("offset", "limit", "order").foldLeft(
+      phraseSearchSession.read(userRequest.sessionId)
+    ) { (acc, k) =>
+      val v = userRequest.getQueryString(k)
+      if (v.isDefined) acc.updated(k, v.get)
+      else acc
+    }
+    val data = PhraseSearchForm.defaultForm.bind(m).fold(
+      _ => PhraseSearchForm(),
+      identity
+    )
+    val pagination = phraseSelectDao.selectByCondition(
+      PhraseSelectDao.Condition(None, data.categoryTitles.headOption),
+      data.offset.getOrElse(0), data.limit.getOrElse(DEFAULT_PHRASE_SELECT_LIMIT), None
+    )
+    phraseSearchSession.update(
+      userRequest.sessionId,
+      PhraseSearchForm.defaultForm.mapping.unbind(data.copy(offset = Some(pagination.offset)))
+    )
+    Ok(views.html.phrase.index(pagination))
+  }
+
+  def search() = userAction { implicit userRequest =>
+    val data = PhraseSearchForm.fromRequest.fold(
+      _ => PhraseSearchForm(),
+      identity
+    )
+    val m = PhraseSearchForm.defaultForm.mapping.unbind(data)
+    phraseSearchSession.update(userRequest.sessionId, m)
+    Redirect(routes.PhraseController.index())
+  }
 
   def detail(id: Long) = userAction {
     phraseDao.find(id).map { phrase =>

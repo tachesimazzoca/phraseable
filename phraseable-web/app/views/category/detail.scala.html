@@ -1,14 +1,30 @@
-@(category: models.Category)
+@(category: models.Category, phraseSelectPagination: components.util.Pagination[models.PhraseSelect])
 
 @import _helpers.markdown._
 
 @_layouts.default(Some(category.title)) {
 
-  <div class="form-group">
+  <div class="clearfix">
     <div class="pull-right">
       <a class="btn btn-default" href="@routes.CategoryController.edit(Some(category.id))">Edit</a>
     </div>
   </div>
 
   <div>@Html(md2html(category.description))</div>
+
+  @if(!phraseSelectPagination.rows.isEmpty) {
+    <h3>Phrases</h3>
+    <table class="table">
+      <tr>
+        <th>Content</th>
+        <th>Definition</th>
+      </tr>
+    @for(row <- phraseSelectPagination.rows) {
+      <tr>
+        <td><a href="@routes.PhraseController.detail(row.id)">@row.content</a></td>
+        <td>@row.definition</td>
+      </tr>
+    }
+    </table>
+  }
 }

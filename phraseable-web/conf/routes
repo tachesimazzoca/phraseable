@@ -16,6 +16,7 @@ GET     /account/error/*name                     controllers.AccountController.e
 GET     /dashboard                               controllers.DashboardController.index()
 
 GET     /phrase                                  controllers.PhraseController.index()
+GET     /phrase/search                           controllers.PhraseController.search()
 GET     /phrase/edit                             controllers.PhraseController.edit(id: Option[Long])
 POST    /phrase/edit                             controllers.PhraseController.postEdit()
 GET     /phrase/:id                              controllers.PhraseController.detail(id: Long)
