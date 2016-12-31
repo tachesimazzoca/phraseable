@@ -15,7 +15,7 @@
   <div>@Html(md2html(phrase.description))</div>
 
   @if(!categories.isEmpty) {
-    <h3>Tags</h3>
+    <h3>Categories</h3>
     <ul>
     @categories.map { category =>
       <li><a href="@routes.CategoryController.detail(category.id)">@category.title</a></li>
