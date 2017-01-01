@@ -13,7 +13,7 @@ class PhraseSelectDaoSuite extends FunSuite {
 
       val phraseSelectDao = new PhraseSelectDao(db)
       val pagination = phraseSelectDao.selectByCondition(
-        PhraseSelectDao.Condition.defaultCondition, 0, 20, None)
+        PhraseSelectDao.Condition(), 0, 20, None)
       assert(Seq.empty[PhraseSelect] === pagination.rows)
 
       Seq(
@@ -38,24 +38,24 @@ class PhraseSelectDaoSuite extends FunSuite {
       ).foreach(x => relPhraseCategoryDao.updateByPhraseId(x._1, x._2))
 
       val orderById = phraseSelectDao.selectByCondition(
-        PhraseSelectDao.Condition.defaultCondition,
+        PhraseSelectDao.Condition(),
         0, 10, Some(PhraseSelectDao.OrderBy.IdAsc))
       assert(Seq(1L, 2L, 3L, 4L) === orderById.rows.map(_.id))
 
       val orderByContent = phraseSelectDao.selectByCondition(
-        PhraseSelectDao.Condition.defaultCondition,
+        PhraseSelectDao.Condition(),
         0, 10, Some(PhraseSelectDao.OrderBy.ContentAsc))
       assert(Seq(3L, 4L, 1L, 2L) === orderByContent.rows.map(_.id))
 
       val filteredByCategoryId = phraseSelectDao.selectByCondition(
-        PhraseSelectDao.Condition(Some(3L), None),
+        PhraseSelectDao.Condition(Some(3L)),
         0, 10, Some(PhraseSelectDao.OrderBy.ContentAsc))
       assert(Seq(3L, 2L) === filteredByCategoryId.rows.map(_.id))
 
-      val filteredByCategoryTitle = phraseSelectDao.selectByCondition(
-        PhraseSelectDao.Condition(None, Some("cat2")),
-        0, 10, Some(PhraseSelectDao.OrderBy.IdAsc))
-      assert(Seq(1L, 2L) === filteredByCategoryTitle.rows.map(_.id))
+      val filteredByCategoryTitles = phraseSelectDao.selectByCondition(
+        PhraseSelectDao.Condition(categoryTitles = Seq("cat2", "cat3")),
+        0, 10, Some(PhraseSelectDao.OrderBy.ContentAsc))
+      assert(Seq(3L, 1L, 2L) === filteredByCategoryTitles.rows.map(_.id))
     }
   }
 }

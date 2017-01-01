@@ -13,6 +13,8 @@ case class PhraseSearchForm(
 
 object PhraseSearchForm extends NormalizationSupport {
 
+  override val nonBlankFields: Seq[String] = Seq("categoryTitles")
+
   private val form = Form(
     mapping(
       "categoryTitles" -> seq(text),
@@ -26,4 +28,6 @@ object PhraseSearchForm extends NormalizationSupport {
 
   def fromRequest(implicit request: play.api.mvc.Request[_]): Form[PhraseSearchForm] =
     form.bindFromRequest(normalize(request))
+
+  def unbind(data: PhraseSearchForm): Map[String, String] = form.mapping.unbind(data)
 }

@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
+import components.util.Pagination
 import controllers.action.{MemberAction, UserAction}
 import controllers.session.UserSessionFactory
 import models._
@@ -28,36 +29,38 @@ class PhraseController @Inject() (
   lazy private val phraseSearchSession = userSessionFactory.create("PhraseSearch")
 
   def index() = userAction { implicit userRequest =>
-    // Bind session and request parameters
-    val m = Seq("offset", "limit", "order").foldLeft(
-      phraseSearchSession.read(userRequest.sessionId)
-    ) { (acc, k) =>
-      val v = userRequest.getQueryString(k)
-      if (v.isDefined) acc.updated(k, v.get)
-      else acc
-    }
-    val data = PhraseSearchForm.defaultForm.bind(m).fold(
-      _ => PhraseSearchForm(),
-      identity
+    // Merge saved search session with query parameters
+    val saved = PhraseSearchForm.defaultForm
+      .bind(phraseSearchSession.read(userRequest.sessionId))
+      .fold(_ => PhraseSearchForm(), identity)
+    val data = saved.copy(
+      offset = userRequest.getQueryString("offset")
+        .map(Pagination.parseOffset(_, 0)).orElse(saved.offset),
+      limit = userRequest.getQueryString("limit")
+        .map(Pagination.parseLimit(_, DEFAULT_PHRASE_SELECT_LIMIT)).orElse(saved.limit),
+      orderBy = userRequest.getQueryString("order").orElse(saved.orderBy)
     )
+
+    // Retrieve rows with pagination result
     val pagination = phraseSelectDao.selectByCondition(
-      PhraseSelectDao.Condition(None, data.categoryTitles.headOption),
-      data.offset.getOrElse(0), data.limit.getOrElse(DEFAULT_PHRASE_SELECT_LIMIT), None
+      PhraseSelectDao.Condition(None, data.categoryTitles),
+      data.offset.getOrElse(0),
+      data.limit.getOrElse(DEFAULT_PHRASE_SELECT_LIMIT),
+      None
     )
+    // Store the search condition
     phraseSearchSession.update(
       userRequest.sessionId,
-      PhraseSearchForm.defaultForm.mapping.unbind(data.copy(offset = Some(pagination.offset)))
+      PhraseSearchForm.unbind(data.copy(offset = Some(pagination.offset)))
     )
+
     Ok(views.html.phrase.index(pagination))
   }
 
   def search() = userAction { implicit userRequest =>
     val data = PhraseSearchForm.fromRequest.fold(
-      _ => PhraseSearchForm(),
-      identity
-    )
-    val m = PhraseSearchForm.defaultForm.mapping.unbind(data)
-    phraseSearchSession.update(userRequest.sessionId, m)
+      _ => PhraseSearchForm(), identity)
+    phraseSearchSession.update(userRequest.sessionId, PhraseSearchForm.unbind(data))
     Redirect(routes.PhraseController.index())
   }
 

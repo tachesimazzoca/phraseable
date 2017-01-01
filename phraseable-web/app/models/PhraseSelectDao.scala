@@ -28,13 +28,9 @@ object PhraseSelectDao {
   }
 
   case class Condition(
-    categoryId: Option[Long],
-    categoryTitle: Option[String]
+    categoryId: Option[Long] = None,
+    categoryTitles: Seq[String] = Seq.empty
   )
-
-  object Condition {
-    def defaultCondition = Condition(None, None)
-  }
 }
 
 class PhraseSelectDao @Inject() (
@@ -92,7 +88,7 @@ class PhraseSelectDao @Inject() (
       )
       bindValues.append('categoryId -> condition.categoryId.get)
     }
-    if (condition.categoryTitle.isDefined) {
+    if (!condition.categoryTitles.isEmpty) {
       whereConditions.append(
         """
         id IN (
@@ -100,12 +96,12 @@ class PhraseSelectDao @Inject() (
           FROM rel_phrase_category AS a, category AS b
           WHERE
             b.id = a.category_id
-            AND b.title = {categoryTitle}
+            AND b.title IN ({categoryTitles})
           GROUP BY a.phrase_id
         )
         """
       )
-      bindValues.append('categoryTitle -> condition.categoryTitle.get)
+      bindValues.append('categoryTitles -> condition.categoryTitles)
     }
     val whereClause = if (whereConditions.isEmpty) ""
     else {

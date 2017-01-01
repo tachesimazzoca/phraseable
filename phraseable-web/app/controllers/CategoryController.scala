@@ -2,7 +2,6 @@ package controllers
 
 import javax.inject.Inject
 
-import components.util.Pagination
 import controllers.action.{MemberAction, UserAction}
 import models._
 import models.form.{CategoryEditForm, CategorySearchForm}
@@ -49,7 +48,8 @@ class CategoryController @Inject() (
   def detail(id: Long) = userAction { implicit userRequest =>
     categoryDao.find(id).map { category =>
       val pagination = phraseSelectDao.selectByCondition(
-        PhraseSelectDao.Condition(Some(category.id), None), 0, DEFAULT_PHRASE_SELECT_LIMIT, None)
+        PhraseSelectDao.Condition(categoryId = Some(category.id)),
+        0, DEFAULT_PHRASE_SELECT_LIMIT, None)
       Ok(views.html.category.detail(category, pagination))
     }.getOrElse {
       NotFound
