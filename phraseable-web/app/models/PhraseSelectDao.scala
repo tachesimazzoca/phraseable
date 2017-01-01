@@ -99,6 +99,12 @@ class PhraseSelectDao @Inject() (
         bindValues.append(Symbol(k) -> s"%${x}%")
         idx + 1
       }
+      condition.keywords.foldLeft(0) { (idx, x) =>
+        val k = "definitionKeyword_%d".format(idx)
+        pairs.append(s"definition LIKE {${k}}")
+        bindValues.append(Symbol(k) -> s"%${x}%")
+        idx + 1
+      }
       whereConditions.append(pairs.mkString(" OR "))
     }
 
