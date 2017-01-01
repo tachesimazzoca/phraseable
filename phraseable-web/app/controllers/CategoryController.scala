@@ -84,6 +84,11 @@ class CategoryController @Inject() (
     }
   }
 
+  def delete(id: Long) = (userAction andThen memberAction) {
+    categoryDao.delete(id)
+    Redirect(routes.CategoryController.index())
+  }
+
   def edit(id: Option[Long]) = (userAction andThen memberAction) { implicit request =>
 
     val flash = request.flash.data.get(FLASH_POST_EDIT)

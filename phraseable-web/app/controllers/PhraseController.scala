@@ -77,6 +77,11 @@ class PhraseController @Inject() (
     }
   }
 
+  def delete(id: Long) = (userAction andThen memberAction) {
+    phraseDao.delete(id)
+    Redirect(routes.PhraseController.index())
+  }
+
   def edit(id: Option[Long]) = (userAction andThen memberAction) { implicit request =>
 
     val flash = request.flash.data.get(FLASH_POST_EDIT)

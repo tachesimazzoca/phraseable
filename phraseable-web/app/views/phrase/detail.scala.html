@@ -2,22 +2,19 @@
 
 @import _helpers.markdown._
 
-@_layouts.default(None) {
-  <ul class="breadcrumb">
-    <li><a href="@routes.PhraseController.index()">Phrases</a></li>
-  </ul>
+@_layouts.default(Some(phrase.content)) {
 
-  <h1 class="page-header">@phrase.content</h1>
-
-  <div class="form-group">
-    <div class="pull-right">
-      <a class="btn btn-default" href="@routes.PhraseController.edit(Some(phrase.id))">Edit</a>
-    </div>
-  </div>
-
-  <p>@phrase.definition</p>
+  <div class="well">@phrase.definition</div>
 
   <div>@Html(md2html(phrase.description))</div>
+
+  <div class="form-group clearfix">
+    <div class="pull-right">
+      <a class="btn btn-default" href="@routes.PhraseController.edit(Some(phrase.id))">Edit</a>
+      <a class="btn btn-danger" href="@routes.PhraseController.delete(phrase.id)"
+         onclick="return confirm('Are you sure to delete?')">Delete</a>
+    </div>
+  </div>
 
   @if(!categories.isEmpty) {
     <h3>Related Categories</h3>

@@ -11,7 +11,6 @@ class DashboardController @Inject() (
 ) extends Controller {
 
   def index = (userAction andThen memberAction) { implicit memberRequest =>
-    println(memberRequest.account)
-    Ok("ok")
+    Redirect(routes.Application.index())
   }
 }

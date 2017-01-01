@@ -20,6 +20,7 @@ POST    /phrase/search                           controllers.PhraseController.se
 GET     /phrase/search                           controllers.PhraseController.search()
 GET     /phrase/edit                             controllers.PhraseController.edit(id: Option[Long])
 POST    /phrase/edit                             controllers.PhraseController.postEdit()
+GET     /phrase/delete/:id                       controllers.PhraseController.delete(id: Long)
 GET     /phrase/:id                              controllers.PhraseController.detail(id: Long)
 
 GET     /category                                controllers.CategoryController.index()
@@ -27,6 +28,7 @@ POST    /category/search                         controllers.CategoryController.
 GET     /category/search                         controllers.CategoryController.search()
 GET     /category/edit                           controllers.CategoryController.edit(id: Option[Long])
 POST    /category/edit                           controllers.CategoryController.postEdit()
+GET     /category/delete/:id                     controllers.CategoryController.delete(id: Long)
 GET     /category/:id                            controllers.CategoryController.detail(id: Long)
 
 GET     /*file                                   controllers.Assets.at(path="/public", file)

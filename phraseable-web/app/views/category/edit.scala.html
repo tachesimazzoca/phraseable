@@ -19,7 +19,7 @@
     </div>
   }
 
-  <div style="width: 600px">
+  <div style="max-width: 600px">
     @helper.form(routes.CategoryController.postEdit()) {
       @toHtmlInput(form("id"), 'type -> "hidden")
       <div class="form-group">
