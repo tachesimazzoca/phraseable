@@ -1,7 +1,5 @@
 package controllers.session
 
-import javax.inject.{Inject, Named}
-
 import components.storage.Storage
 
 class UserSession (
@@ -9,7 +7,8 @@ class UserSession (
   namespace: String
 ) {
 
-  lazy private val dataPrefix = s"${namespace}.data."
+  lazy private val namespacePrefix = s"${namespace}."
+  lazy private val dataPrefix = s"${namespacePrefix}data."
 
   def create(): String = storage.create()
 
@@ -19,12 +18,12 @@ class UserSession (
       .map(x => x._1.substring(dataPrefix.length()) -> x._2)
 
   def update(key: String, data: Map[String, String]): Unit = {
-    val m = storage.read(key).getOrElse(Map.empty)
+    val m = storage.read(key).getOrElse(Map.empty).filter(!_._1.startsWith(namespacePrefix))
     storage.write(key, m ++ data.map(x => s"${dataPrefix}${x._1}" -> x._2))
   }
 
   def delete(key: String): Unit = {
-    val m = storage.read(key).getOrElse(Map.empty).filter(!_._1.startsWith(s"${namespace}."))
+    val m = storage.read(key).getOrElse(Map.empty).filter(!_._1.startsWith(namespacePrefix))
     storage.write(key, m)
   }
 }
