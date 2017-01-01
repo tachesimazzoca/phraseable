@@ -25,7 +25,11 @@ class PhraseController @Inject() (
   private val FLASH_POST_EDIT = "PhraseController.postEdit"
 
   private val DEFAULT_PHRASE_SELECT_LIMIT = 20
-
+  private val DEFAULT_PHRASE_SELECT_ORDER_BY = PhraseSelectDao.OrderBy.ContentAsc
+  private val PHRASE_SELECT_ORDER_BY_MAP = Map(
+    "id_asc" -> PhraseSelectDao.OrderBy.IdAsc,
+    "content_asc" -> PhraseSelectDao.OrderBy.ContentAsc
+  )
   lazy private val phraseSearchSession = userSessionFactory.create("PhraseSearch")
 
   def index() = userAction { implicit userRequest =>
@@ -33,7 +37,7 @@ class PhraseController @Inject() (
     val saved = PhraseSearchForm.defaultForm
       .bind(phraseSearchSession.read(userRequest.sessionId))
       .fold(_ => PhraseSearchForm(), identity)
-    val data = saved.copy(
+    val merged = saved.copy(
       offset = userRequest.getQueryString("offset")
         .map(Pagination.parseOffset(_, 0)).orElse(saved.offset),
       limit = userRequest.getQueryString("limit")
@@ -43,18 +47,18 @@ class PhraseController @Inject() (
 
     // Retrieve rows with pagination result
     val pagination = phraseSelectDao.selectByCondition(
-      PhraseSelectDao.Condition(None, data.categoryTitles),
-      data.offset.getOrElse(0),
-      data.limit.getOrElse(DEFAULT_PHRASE_SELECT_LIMIT),
+      PhraseSelectDao.Condition(Seq.empty, merged.keywords),
+      merged.offset.getOrElse(0),
+      merged.limit.getOrElse(DEFAULT_PHRASE_SELECT_LIMIT),
       None
     )
-    // Store the search condition
-    phraseSearchSession.update(
-      userRequest.sessionId,
-      PhraseSearchForm.unbind(data.copy(offset = Some(pagination.offset)))
-    )
+    val phraseSearchForm = PhraseSearchForm.defaultForm.fill(
+      merged.copy(offset = Some(pagination.offset)))
 
-    Ok(views.html.phrase.index(pagination))
+    // Store the search condition
+    phraseSearchSession.update(userRequest.sessionId, phraseSearchForm.data)
+
+    Ok(views.html.phrase.index(pagination, phraseSearchForm))
   }
 
   def search() = userAction { implicit userRequest =>

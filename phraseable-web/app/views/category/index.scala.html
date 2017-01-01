@@ -1,8 +1,18 @@
-@(pagination: components.util.Pagination[models.CategorySelect])
+@(pagination: components.util.Pagination[models.CategorySelect],
+    categorySearchForm: Form[models.form.CategorySearchForm])
 
 @import _helpers.default._
 
-@_layouts.default(Some("Listing Category")) {
+@_layouts.default(Some("Categories")) {
+  <div class="form-group">
+    <div class="form-inline">
+    @helper.form(routes.CategoryController.search()) {
+      @toHtmlInput(categorySearchForm("q"), 'class -> "form-control")
+      <input type="submit" value="Search" class="btn btn-default">
+    }
+    </div>
+  </div>
+
   <table class="table">
     @pagination.rows.map { row =>
       <tr>

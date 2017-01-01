@@ -28,8 +28,8 @@ object PhraseSelectDao {
   }
 
   case class Condition(
-    categoryId: Option[Long] = None,
-    categoryTitles: Seq[String] = Seq.empty
+    categoryIds: Seq[Long] = Seq.empty,
+    keywords: Seq[String] = Seq.empty
   )
 }
 
@@ -74,40 +74,39 @@ class PhraseSelectDao @Inject() (
 
     val bindValues = new ArrayBuffer[NamedParameter]
     val whereConditions = new ArrayBuffer[String]
-    if (condition.categoryId.isDefined) {
+
+    // categoryId
+    if (!condition.categoryIds.isEmpty) {
       whereConditions.append(
         """
         id IN (
           SELECT phrase_id
           FROM rel_phrase_category
           WHERE
-            category_id = {categoryId}
+            category_id IN ({categoryIds})
           GROUP BY phrase_id
         )
         """
       )
-      bindValues.append('categoryId -> condition.categoryId.get)
+      bindValues.append('categoryIds -> condition.categoryIds)
     }
-    if (!condition.categoryTitles.isEmpty) {
-      whereConditions.append(
-        """
-        id IN (
-          SELECT a.phrase_id
-          FROM rel_phrase_category AS a, category AS b
-          WHERE
-            b.id = a.category_id
-            AND b.title IN ({categoryTitles})
-          GROUP BY a.phrase_id
-        )
-        """
-      )
-      bindValues.append('categoryTitles -> condition.categoryTitles)
+    // keywords
+    if (!condition.keywords.isEmpty) {
+      val pairs = new ArrayBuffer[String]
+      condition.keywords.foldLeft(0) { (idx, x) =>
+        val k = "contentKeyword_%d".format(idx)
+        pairs.append(s"content LIKE {${k}}")
+        bindValues.append(Symbol(k) -> s"%${x}%")
+        idx + 1
+      }
+      whereConditions.append(pairs.mkString(" OR "))
     }
-    val whereClause = if (whereConditions.isEmpty) ""
-    else {
-      "WHERE " + whereConditions.mkString(" AND ")
-    }
+
+    val whereClause =
+      if (whereConditions.isEmpty) ""
+      else "WHERE " + whereConditions.mkString(" AND ")
     val orderByClause = orderBy.getOrElse(OrderBy.ContentAsc).clause
+
     Pagination.paginate(offset, limit,
       count = () =>
         countQuery(whereClause).on(bindValues: _*).as(SqlParser.get[Long](1).single),

@@ -2,7 +2,12 @@
 
 @import _helpers.markdown._
 
-@_layouts.default(Some(category.title)) {
+@_layouts.default(None) {
+  <ul class="breadcrumb">
+    <li><a href="@routes.CategoryController.index()">Categories</a></li>
+  </ul>
+
+  <h1 class="page-header">@category.title</h1>
 
   <div class="clearfix">
     <div class="pull-right">
@@ -13,7 +18,7 @@
   <div>@Html(md2html(category.description))</div>
 
   @if(!phraseSelectPagination.rows.isEmpty) {
-    <h3>Phrases</h3>
+    <h3>Related Phrases</h3>
     <table class="table">
       <tr>
         <th>Content</th>

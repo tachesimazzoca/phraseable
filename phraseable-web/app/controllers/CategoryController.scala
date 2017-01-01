@@ -2,7 +2,9 @@ package controllers
 
 import javax.inject.Inject
 
+import components.util.Pagination
 import controllers.action.{MemberAction, UserAction}
+import controllers.session.UserSessionFactory
 import models._
 import models.form.{CategoryEditForm, CategorySearchForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -16,39 +18,65 @@ class CategoryController @Inject() (
   categoryDao: CategoryDao,
   relPhraseCategoryDao: RelPhraseCategoryDao,
   categorySelectDao: CategorySelectDao,
+  userSessionFactory: UserSessionFactory,
   val messagesApi: MessagesApi
 ) extends Controller with I18nSupport {
 
   private val FLASH_POST_EDIT = "CategoryController.postEdit"
 
+  private val DEFAULT_CATEGORY_SELECT_LIMIT = 20
   private val DEFAULT_CATEGORY_SELECT_ORDER_BY = CategorySelectDao.OrderBy.TitleAsc
-
-  private val DEFAULT_PHRASE_SELECT_LIMIT = 1000
-
-  private val supportedOrderByMap = Map(
+  private val CATEGORY_SELECT_ORDER_BY_MAP = Map(
     "id_asc" -> CategorySelectDao.OrderBy.IdAsc,
     "title_asc" -> CategorySelectDao.OrderBy.TitleAsc,
     "phase_count_desc" -> CategorySelectDao.OrderBy.PhraseCountDesc
   )
+  lazy private val categorySearchSession = userSessionFactory.create("CategorySearch")
+
+  private val DEFAULT_PHRASE_SELECT_LIMIT = 1000
 
   def index() = userAction { implicit userRequest =>
-    CategorySearchForm.fromRequest.fold(
-      form => BadRequest,
-      data => {
-        val pagination = categorySelectDao.selectCategories(
-          data.keyword,
-          data.offset.getOrElse(0),
-          data.limit.getOrElse(10),
-          data.orderBy.map(supportedOrderByMap))
-        Ok(views.html.category.index(pagination))
-      }
+    // Merge saved search session with query parameters
+    val saved = CategorySearchForm.defaultForm
+      .bind(categorySearchSession.read(userRequest.sessionId))
+      .fold(_ => CategorySearchForm(), identity)
+    val merged = saved.copy(
+      offset = userRequest.getQueryString("offset")
+        .map(Pagination.parseOffset(_, 0)).orElse(saved.offset),
+      limit = userRequest.getQueryString("limit")
+        .map(Pagination.parseLimit(_, DEFAULT_CATEGORY_SELECT_LIMIT))
+        .orElse(saved.limit),
+      orderBy = userRequest.getQueryString("order").orElse(saved.orderBy)
     )
+
+    // Retrieve rows with pagination result
+    val pagination = categorySelectDao.selectByCondition(
+      CategorySelectDao.Condition(merged.keywords),
+      merged.offset.getOrElse(0),
+      merged.limit.getOrElse(DEFAULT_CATEGORY_SELECT_LIMIT),
+      merged.orderBy.map(CATEGORY_SELECT_ORDER_BY_MAP)
+        .orElse(Some(DEFAULT_CATEGORY_SELECT_ORDER_BY))
+    )
+    val categorySearchForm = CategorySearchForm.defaultForm.fill(
+      merged.copy(offset = Some(pagination.offset)))
+
+    // Store the search condition
+    categorySearchSession.update(userRequest.sessionId, categorySearchForm.data)
+
+    Ok(views.html.category.index(pagination, categorySearchForm))
+  }
+
+  def search() = userAction { implicit userRequest =>
+    val data = CategorySearchForm.fromRequest.fold(
+      _ => CategorySearchForm(), identity)
+    categorySearchSession.update(userRequest.sessionId, CategorySearchForm.unbind(data))
+    Redirect(routes.CategoryController.index())
   }
 
   def detail(id: Long) = userAction { implicit userRequest =>
     categoryDao.find(id).map { category =>
       val pagination = phraseSelectDao.selectByCondition(
-        PhraseSelectDao.Condition(categoryId = Some(category.id)),
+        PhraseSelectDao.Condition(categoryIds = Seq(category.id)),
         0, DEFAULT_PHRASE_SELECT_LIMIT, None)
       Ok(views.html.category.detail(category, pagination))
     }.getOrElse {

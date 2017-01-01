@@ -1,8 +1,18 @@
-@(phraseSelectPagination: components.util.Pagination[models.PhraseSelect])
+@(phraseSelectPagination: components.util.Pagination[models.PhraseSelect],
+    phraseSearchForm: Form[models.form.PhraseSearchForm])
 
 @import _helpers.default._
 
-@_layouts.default(Some("Listing Phrases")) {
+@_layouts.default(Some("Phrases")) {
+
+  <div class="form-group">
+    <div class="form-inline">
+      @helper.form(routes.PhraseController.search()) {
+        @toHtmlInput(phraseSearchForm("q"), 'class -> "form-control")
+        <input type="submit" value="Search" class="btn btn-default">
+      }
+    </div>
+  </div>
 
   @if(!phraseSelectPagination.rows.isEmpty) {
     <table class="table">

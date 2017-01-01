@@ -1,11 +1,12 @@
 package models.form
 
+import org.apache.commons.lang3.StringUtils
 import play.api.data.Forms._
 import play.api.data._
 import play.api.data.format.Formats._
 
 case class PhraseSearchForm(
-  categoryTitles: Seq[String] = Seq.empty,
+  keywords: Seq[String] = Seq.empty,
   offset: Option[Long] = None,
   limit: Option[Long] = None,
   orderBy: Option[String] = None
@@ -13,15 +14,23 @@ case class PhraseSearchForm(
 
 object PhraseSearchForm extends NormalizationSupport {
 
-  override val nonBlankFields: Seq[String] = Seq("categoryTitles")
+  private val KEYWORD_SEPARATOR = " "
 
   private val form = Form(
     mapping(
-      "categoryTitles" -> seq(text),
+      "q" -> optional(text),
       "offset" -> optional(of[Long]),
       "limit" -> optional(of[Long]),
       "order" -> optional(text)
-    )(PhraseSearchForm.apply)(PhraseSearchForm.unapply)
+    ) { (q, offset, limit, order) =>
+      val keywords = q.map { x =>
+        x.split(KEYWORD_SEPARATOR).map(StringUtils.stripToEmpty).filter(!_.isEmpty).toSeq
+      }.getOrElse(Seq.empty)
+      PhraseSearchForm(keywords, offset, limit, order)
+    } { a =>
+      val q = if (a.keywords.isEmpty) None else Some(a.keywords.mkString(KEYWORD_SEPARATOR))
+      Some(q, a.offset, a.limit, a.orderBy)
+    }
   )
 
   val defaultForm: Form[PhraseSearchForm] = form

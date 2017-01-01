@@ -2,7 +2,12 @@
 
 @import _helpers.markdown._
 
-@_layouts.default(Some(phrase.content)) {
+@_layouts.default(None) {
+  <ul class="breadcrumb">
+    <li><a href="@routes.PhraseController.index()">Phrases</a></li>
+  </ul>
+
+  <h1 class="page-header">@phrase.content</h1>
 
   <div class="form-group">
     <div class="pull-right">
@@ -15,7 +20,7 @@
   <div>@Html(md2html(phrase.description))</div>
 
   @if(!categories.isEmpty) {
-    <h3>Categories</h3>
+    <h3>Related Categories</h3>
     <ul>
     @categories.map { category =>
       <li><a href="@routes.CategoryController.detail(category.id)">@category.title</a></li>

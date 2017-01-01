@@ -6,6 +6,8 @@ import anorm._
 import components.util.Pagination
 import play.api.db.Database
 
+import scala.collection.mutable.ArrayBuffer
+
 case class CategorySelect(
   id: Long,
   title: String,
@@ -23,10 +25,14 @@ object CategorySelectDao {
 
     case object TitleAsc extends OrderBy("title ASC")
 
-    case object PhraseCountDesc extends OrderBy("phrase_count DESC")
+    case object PhraseCountDesc extends OrderBy(
+      "phrase_count DESC, title ASC, id ASC")
 
   }
 
+  case class Condition(
+    keywords: Seq[String] = Seq.empty
+  )
 }
 
 class CategorySelectDao @Inject() (
@@ -35,18 +41,17 @@ class CategorySelectDao @Inject() (
 
   import CategorySelectDao._
 
-  private val countCategoriesQuery = SQL(
-    """
+  private def countQuery(where: String) = SQL(
+    s"""
     SELECT
       COUNT(*)
     FROM
-      category
-    WHERE
-      title LIKE {titleLike}
+      category AS a
+    ${where}
     """
   )
 
-  private def selectCategoriesQuery(orderBy: String) = SQL(
+  private def selectQuery(where: String, orderBy: String) = SQL(
     s"""
     SELECT
       a.id AS id,
@@ -63,8 +68,7 @@ class CategorySelectDao @Inject() (
       GROUP BY category_id
     ) AS b
     ON b.category_id = a.id
-    WHERE
-      a.title LIKE {titleLike}
+    ${where}
     ORDER BY ${orderBy}
     LIMIT {offset}, {limit}
     """
@@ -80,23 +84,40 @@ class CategorySelectDao @Inject() (
     }
   }
 
-  def selectCategories(
-    keyword: Option[String],
+  def selectByCondition(
+    condition: Condition,
     offset: Long, limit: Long, orderBy: Option[OrderBy]
   ): Pagination[CategorySelect] = db.withConnection { implicit conn =>
 
-    val titleLike = keyword.map(x => s"${x}%").getOrElse("%")
+    val whereConditions = new ArrayBuffer[String]
+    val bindValues = new ArrayBuffer[NamedParameter]
+
+    // keywords
+    if (!condition.keywords.isEmpty) {
+      val pairs = new ArrayBuffer[String]
+      condition.keywords.foldLeft(0) { (idx, x) =>
+        val k = "titleKeyword_%d".format(idx)
+        pairs.append(s"title LIKE {${k}}")
+        bindValues.append(Symbol(k) -> s"%${x}%")
+        idx + 1
+      }
+      whereConditions.append(pairs.mkString(" OR "))
+    }
+
+    val whereClause =
+      if (whereConditions.isEmpty) ""
+      else "WHERE " + whereConditions.mkString(" AND ")
     val orderByClause = orderBy.getOrElse(OrderBy.TitleAsc).clause
 
     Pagination.paginate(offset, limit,
       count = () =>
-        countCategoriesQuery.on('titleLike -> titleLike).as(SqlParser.get[Long](1).single),
+        countQuery(whereClause).on(bindValues: _*).as(SqlParser.get[Long](1).single),
       select = (theOffset, theLimit) => {
-        selectCategoriesQuery(orderByClause).on(
-          'titleLike -> titleLike,
+        val bindValuesWithLimit = bindValues ++ Seq[NamedParameter](
           'offset -> theOffset,
           'limit -> theLimit
-        ).as(rowParser.*)
+        )
+        selectQuery(whereClause, orderByClause).on(bindValuesWithLimit: _*).as(rowParser.*)
       }
     )
   }
