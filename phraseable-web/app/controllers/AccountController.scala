@@ -11,6 +11,8 @@ import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 
+import scala.util.Try
+
 class AccountController @Inject() (
   userAction: UserAction,
   @Named("verificationStorage") verificationStorage: Storage,
@@ -22,37 +24,50 @@ class AccountController @Inject() (
 
   private val logger = Logger(this.getClass())
 
-  private val accountLoginForm = AccountLoginForm.defaultForm
   private val accountCreateForm = AccountCreateForm.defaultForm
 
   lazy private val userLoginSession =
     userSessionFactory.createUserLoginSession()
 
-  def login = userAction { implicit request =>
-    Ok(views.html.account.login(accountLoginForm))
+  def login(returnTo: Option[String]) = userAction { implicit userRequest =>
+    val form = AccountLoginForm.defaultForm.fill(
+      AccountLoginForm(returnTo = returnTo.filter(isValidReturnTo)))
+    Ok(views.html.account.login(form))
   }
 
   def postLogin = userAction { implicit request =>
     userLoginSession.delete(request.sessionId)
     AccountLoginForm.fromRequest.fold(
-      form => BadRequest(views.html.account.login(form)),
+      form => {
+        BadRequest(views.html.account.login(form))
+      },
       data => {
         (for {
           a <- accountDao.findByEmail(data.email)
           if (a.status == Account.Status.Active && a.password.matches(data.password))
         } yield a).map { account =>
           userLoginSession.update(request.sessionId, Map("accountId" -> account.id.toString))
-          Redirect(routes.DashboardController.index())
+          // TODO: Set-Cookie for keepMeLoggedIn
+          data.returnTo.filter(isValidReturnTo).map { returnTo =>
+            Redirect(returnTo)
+          }.getOrElse {
+            Redirect(routes.DashboardController.index())
+          }
         }.getOrElse {
-          BadRequest(views.html.account.login(AccountLoginForm.deauthorize(data)))
+          // Re-bind fields in order to add the authorization error
+          val m = AccountLoginForm.unbind(data.copy(authorized = false))
+          BadRequest(views.html.account.login(AccountLoginForm.defaultForm.bind(m)))
         }
       }
     )
   }
 
+  private def isValidReturnTo(returnTo: String): Boolean =
+    returnTo.matches("""^/[-_=~%#&/0-9a-zA-Z\.\-\+\?\:\[\]]{0,255}$""")
+
   def logout = userAction { implicit request =>
     userLoginSession.delete(request.sessionId)
-    Redirect(routes.AccountController.login())
+    Redirect(routes.AccountController.login(None))
   }
 
   def create = userAction { implicit request =>

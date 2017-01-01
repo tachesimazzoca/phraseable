@@ -1,3 +1,5 @@
+AccountLoginForm.error.email=E-mail Address is required.
+AccountLoginForm.error.password=Password is required.
 AccountLoginForm.error.authorized=Invalid E-mail Address or Password
 
 AccountCreateForm.error.email=E-mail Address must be a valid e-mail address.

@@ -30,7 +30,10 @@ class MemberAction @Inject() (
     accountOpt.map { account =>
       Right(new MemberRequest(account, request))
     }.getOrElse {
-      Left(Redirect(routes.AccountController.login()))
+      val returnTo =
+        if (request.method == "GET") Some(request.uri)
+        else None
+      Left(Redirect(routes.AccountController.login(returnTo)))
     }
   }
 }

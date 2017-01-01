@@ -3,7 +3,7 @@ GET     /                                        controllers.Application.index()
 GET     /pages                                   controllers.PagesController.index()
 GET     /pages/*name                             controllers.PagesController.page(name: String)
 
-GET     /account/login                           controllers.AccountController.login()
+GET     /account/login                           controllers.AccountController.login(returnTo: Option[String])
 POST    /account/login                           controllers.AccountController.postLogin()
 GET     /account/logout                          controllers.AccountController.logout()
 

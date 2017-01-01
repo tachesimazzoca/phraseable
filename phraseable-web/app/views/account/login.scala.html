@@ -15,21 +15,30 @@
     </div>
   }
 
-  <div style="width: 400px; margin: 0 auto">
+  <div style="max-width: 400px; margin: 0 auto">
     @helper.form(routes.AccountController.postLogin()) {
-    <div class="well">
-      <div class="form-group">
-        <label>E-mail Address</label>
-        @toHtmlInput(form("email"), 'class -> "form-control")
+      @toHtmlInput(form("returnTo"), 'type -> "hidden")
+      <div class="well">
+        <div class="form-group">
+          <label>E-mail Address</label>
+          @toHtmlInput(form("email"), 'class -> "form-control")
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          @toHtmlInput(form("password"), 'type -> "password", 'class -> "form-control")
+        </div>
+        <div style="text-align: center">
+          <div class="checkbox">
+            <label><input type="checkbox" name="keepMeLoggedIn"
+                value="1"@{
+                  form("keepMeLoggedIn").value.map { x =>
+                    if (x == "1") Html(""" checked="checked"""")
+                  }
+                }>Keep me logged in</label>
+          </div>
+          <input type="submit" value="Sign In" class="btn btn-success">
+        </div>
       </div>
-      <div class="form-group">
-        <label>Password</label>
-        @toHtmlInput(form("password"), 'type -> "password", 'class -> "form-control")
-      </div>
-      <div>
-        <input type="submit" value="Sign In" class="btn btn-success">
-      </div>
-    </div>
     }
   </div>
 }
