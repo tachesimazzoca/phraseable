@@ -8,6 +8,7 @@ libraryDependencies ++= Seq(
   jdbc,
   evolutions,
   "com.typesafe.play" %% "anorm" % "2.5.0",
+  "mysql" % "mysql-connector-java" % "5.1.6",
   "com.h2database" % "h2" % "1.4.178",
   "org.apache.commons" % "commons-lang3" % "3.4",
   "org.apache.commons" % "commons-email" % "1.3.2",
