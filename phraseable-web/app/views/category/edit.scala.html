@@ -33,7 +33,7 @@
       <div class="form-group">
         <div class="form-inline">
           <input type="submit" value="Submit" class="btn btn-success">
-          @form("id").value.map { id =>
+          @form("id").value.filter(!_.isEmpty).map { id =>
             <a class="btn btn-default" href="@routes.CategoryController.detail(id.toLong)">View</a>
           }
         </div>
