@@ -14,16 +14,16 @@ class IdSequenceDao @Inject() (db: Database) {
   private val selectForUpdateQuery =
     SQL(
       """
-        SELECT sequence_value FROM id_sequence
-        WHERE sequence_name = {sequence_name} FOR UPDATE
-      """)
+        |SELECT sequence_value FROM id_sequence
+        | WHERE sequence_name = {sequence_name} FOR UPDATE
+      """.stripMargin)
 
   private val updateQuery =
     SQL(
       """
-        UPDATE id_sequence SET sequence_value = {sequence_value}
-        WHERE sequence_name = {sequence_name}
-      """)
+        |UPDATE id_sequence SET sequence_value = {sequence_value}
+        | WHERE sequence_name = {sequence_name}
+      """.stripMargin)
 
   def nextId(sequenceType: SequenceType): Long =
     db.withTransaction { implicit conn =>
@@ -36,5 +36,13 @@ class IdSequenceDao @Inject() (db: Database) {
         'sequence_value -> nextId
       ).executeUpdate()
       nextId
+    }
+
+  def reset(sequenceType: SequenceType): Unit =
+    db.withTransaction { implicit conn =>
+      updateQuery.on(
+        'sequence_name -> sequenceType.name,
+        'sequence_value -> 0
+      ).executeUpdate()
     }
 }

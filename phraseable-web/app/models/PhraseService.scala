@@ -23,7 +23,9 @@ class PhraseService @Inject() (
   def truncate(): Unit = {
     relPhraseCategoryDao.truncate()
     categoryDao.truncate()
+    idSequenceDao.reset(IdSequence.SequenceType.Category)
     phraseDao.truncate()
+    idSequenceDao.reset(IdSequence.SequenceType.Phrase)
   }
 
   def create(
