@@ -8,7 +8,12 @@ trait NormalizationSupport {
 
   final def normalize(implicit request: play.api.mvc.Request[_]): Map[String, Seq[String]] = {
     normalize(request.body match {
-      case body: play.api.mvc.AnyContent if body.asFormUrlEncoded.isDefined => body.asFormUrlEncoded.get
+      case body: play.api.mvc.AnyContent if body.asFormUrlEncoded.isDefined =>
+        body.asFormUrlEncoded.get
+      case body: play.api.mvc.AnyContent if body.asMultipartFormData.isDefined =>
+        body.asMultipartFormData.get.asFormUrlEncoded
+      case body: Map[_, _] => body.asInstanceOf[Map[String, Seq[String]]]
+      case body: play.api.mvc.MultipartFormData[_] => body.asFormUrlEncoded
       case _ => Map.empty[String, Seq[String]]
     }) ++ request.queryString
   }

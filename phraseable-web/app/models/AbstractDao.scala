@@ -31,6 +31,9 @@ abstract class AbstractDao[T, U](db: Database) {
   private lazy val deleteQuery: SqlQuery =
     SQL(s"""DELETE FROM ${tableName} WHERE ${idColumn} = {${idColumn}}""")
 
+  private lazy val truncateQuery =
+    SQL(s"TRUNCATE TABLE ${tableName}")
+
   private def toIdValue(id: U): ParameterValue =
     if (id.isInstanceOf[Int]) id.asInstanceOf[Int]
     else if (id.isInstanceOf[Long]) id.asInstanceOf[Long]
@@ -57,5 +60,10 @@ abstract class AbstractDao[T, U](db: Database) {
   def delete(id: U): Unit =
     db.withTransaction { implicit conn =>
       deleteQuery.on(Symbol(idColumn) -> toIdValue(id)).executeUpdate()
+    }
+
+  def truncate(): Unit =
+    db.withConnection { implicit conn =>
+      truncateQuery.execute()
     }
 }

@@ -6,23 +6,22 @@ import components.util.Pagination
 import controllers.action.{MemberAction, UserAction}
 import controllers.session.UserSessionFactory
 import models._
-import models.form.{PhraseEditForm, PhraseSearchForm}
+import models.form.{PhraseEditForm, PhraseSearchForm, PhraseUploadForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Controller
 
 class PhraseController @Inject() (
   userAction: UserAction,
   memberAction: MemberAction,
-  idSequenceDao: IdSequenceDao,
-  phraseDao: PhraseDao,
-  categoryDao: CategoryDao,
-  relPhraseCategoryDao: RelPhraseCategoryDao,
+  phraseService: PhraseService,
+  phraseUploader: PhraseUploadService,
   phraseSelectDao: PhraseSelectDao,
   userSessionFactory: UserSessionFactory,
   val messagesApi: MessagesApi
 ) extends Controller with I18nSupport {
 
   private val FLASH_POST_EDIT = "PhraseController.postEdit"
+  private val FLASH_POST_UPLOAD = "PhraseController.postUpload"
 
   private val DEFAULT_PHRASE_SELECT_LIMIT = 20
   private val DEFAULT_PHRASE_SELECT_ORDER_BY = PhraseSelectDao.OrderBy.ContentAsc
@@ -69,8 +68,7 @@ class PhraseController @Inject() (
   }
 
   def detail(id: Long) = userAction {
-    phraseDao.find(id).map { phrase =>
-      val categories = categoryDao.selectByPhraseId(phrase.id)
+    phraseService.find(id).map { case (phrase, categories) =>
       Ok(views.html.phrase.detail(phrase, categories))
     }.getOrElse {
       NotFound
@@ -78,7 +76,7 @@ class PhraseController @Inject() (
   }
 
   def delete(id: Long) = (userAction andThen memberAction) {
-    phraseDao.delete(id)
+    phraseService.delete(id)
     Redirect(routes.PhraseController.index())
   }
 
@@ -87,11 +85,11 @@ class PhraseController @Inject() (
     val flash = request.flash.data.get(FLASH_POST_EDIT)
 
     id.map { phraseId =>
-      phraseDao.find(phraseId).map { phrase =>
+      phraseService.find(phraseId).map { case (phrase, categories) =>
         val data = PhraseEditForm(
           Some(phrase.id), phrase.lang.name, phrase.content,
           phrase.definition, phrase.description,
-          categoryDao.selectByPhraseId(phraseId).map(_.title)
+          categories.map(_.title)
         )
         Ok(views.html.phrase.edit(PhraseEditForm.defaultForm.fill(data), flash))
       }.getOrElse {
@@ -108,16 +106,16 @@ class PhraseController @Inject() (
       data => {
         data.id.map { phraseId =>
           // Update the stored entry
-          phraseDao.find(phraseId).map { phrase =>
-            phraseDao.update(
+          phraseService.find(phraseId).map { case (phrase, _) =>
+            phraseService.update(
               phrase.copy(
                 lang = Phrase.Lang.fromName(data.lang),
                 content = data.content,
                 definition = data.definition,
                 description = data.description
-              )
+              ),
+              data.categoryTitles
             )
-            updateRelPhraseCategoryRows(phraseId, data.categoryTitles)
             Redirect(routes.PhraseController.edit(Some(phrase.id)))
               .flashing(FLASH_POST_EDIT -> "updated")
 
@@ -127,29 +125,44 @@ class PhraseController @Inject() (
 
         }.getOrElse {
           // Create a new entry
-          val phraseId = idSequenceDao.nextId(IdSequence.SequenceType.Phrase)
-          val phrase = phraseDao.create(
+          val phraseId = phraseService.nextPhraseId()
+          phraseService.create(
             Phrase(phraseId, Phrase.Lang.fromName(data.lang),
-              data.content, data.definition, data.description)
+              data.content, data.definition, data.description),
+            data.categoryTitles
           )
-          updateRelPhraseCategoryRows(phraseId, data.categoryTitles)
-          Redirect(routes.PhraseController.edit(Some(phrase.id)))
+          Redirect(routes.PhraseController.edit(Some(phraseId)))
             .flashing(FLASH_POST_EDIT -> "created")
         }
       }
     )
   }
 
-  private def updateRelPhraseCategoryRows(phraseId: Long, categoryTitles: Seq[String]) = {
-    val categoryIds = categoryTitles.foldLeft(Seq.empty[Long]) { (acc, title) =>
-      categoryDao.findByTitle(title).map { category =>
-        acc :+ category.id
-      }.getOrElse {
-        val categoryId = idSequenceDao.nextId(IdSequence.SequenceType.Category)
-        categoryDao.create(Category(categoryId, title, ""))
-        acc :+ categoryId
-      }
+  def upload = (userAction andThen memberAction) { implicit request =>
+    val flash = request.flash.data.get(FLASH_POST_UPLOAD)
+    Ok(views.html.phrase.upload(PhraseUploadForm.defaultForm, flash))
+  }
+
+  def postUpload = (userAction andThen memberAction) (
+    parse.multipartFormData) { implicit request =>
+
+    request.body.file("data").map { tempFile =>
+      val m = PhraseUploadForm.fromRequest.data
+      PhraseUploadForm.defaultForm.bind(
+        m.updated(
+          "contentType", tempFile.contentType.filter(_.startsWith("text/")).isDefined.toString
+        )
+      ).fold(
+        form => BadRequest(views.html.phrase.upload(form)),
+        data => {
+          val file = tempFile.ref.file
+          phraseUploader.upload(new java.io.FileInputStream(file), data.truncate)
+          file.delete()
+          Redirect(routes.PhraseController.upload()).flashing(FLASH_POST_UPLOAD -> "uploaded")
+        }
+      )
+    }.getOrElse {
+      Redirect(routes.PhraseController.upload())
     }
-    relPhraseCategoryDao.updateByPhraseId(phraseId, categoryIds)
   }
 }

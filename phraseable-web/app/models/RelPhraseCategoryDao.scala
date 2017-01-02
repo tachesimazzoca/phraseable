@@ -11,22 +11,19 @@ class RelPhraseCategoryDao @Inject() (db: Database) {
   private val findByPhraseIdQuery =
     SQL(
       """
-        SELECT category_id FROM rel_phrase_category
-        WHERE phrase_id = {phrase_id} ORDER BY priority
-      """)
+        |SELECT category_id FROM rel_phrase_category
+        | WHERE phrase_id = {phrase_id} ORDER BY priority
+      """.stripMargin)
 
   private val insertQuery =
     SQL(
       """
-        INSERT INTO rel_phrase_category (phrase_id, category_id, priority)
-        VALUES ({phrase_id}, {category_id}, {priority})
-      """)
+        |INSERT INTO rel_phrase_category (phrase_id, category_id, priority)
+        | VALUES ({phrase_id}, {category_id}, {priority})
+      """.stripMargin)
 
   private val deleteByPhraseIdQuery =
-    SQL(
-      """
-         DELETE FROM rel_phrase_category WHERE phrase_id = {phrase_id}
-      """)
+    SQL("DELETE FROM rel_phrase_category WHERE phrase_id = {phrase_id}")
 
   def findByPhraseId(phraseId: Long): Seq[Long] =
     db.withConnection { implicit conn =>
@@ -46,5 +43,13 @@ class RelPhraseCategoryDao @Inject() (db: Database) {
   def deleteByPhraseId(phraseId: Long): Unit =
     db.withTransaction { implicit conn =>
       deleteByPhraseIdQuery.on('phrase_id -> phraseId).executeUpdate()
+    }
+
+  private lazy val truncateQuery =
+    SQL("TRUNCATE TABLE rel_phrase_category")
+
+  def truncate(): Unit =
+    db.withConnection { implicit conn =>
+      truncateQuery.execute()
     }
 }
