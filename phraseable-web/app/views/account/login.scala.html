@@ -30,9 +30,9 @@
         <div style="text-align: center">
           <div class="checkbox">
             <label><input type="checkbox" name="keepMeLoggedIn"
-                value="1"@{
+                value="true"@{
                   form("keepMeLoggedIn").value.map { x =>
-                    if (x == "1") Html(""" checked="checked"""")
+                    if (x == "true") Html(""" checked="checked"""")
                   }
                 }>Keep me logged in</label>
           </div>

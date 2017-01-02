@@ -1,30 +1,42 @@
 package controllers.action
 
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 
+import controllers.cookie.CookieFactory
 import controllers.routes
 import controllers.session.UserSessionFactory
-import models.{Account, AccountDao}
+import models.{Account, AccountAccessDao, AccountDao}
 import play.api.mvc.Results._
 import play.api.mvc.{ActionRefiner, Result}
 
 import scala.concurrent.Future
+import scala.util.Try
 
 class MemberAction @Inject() (
   userSessionFactory: UserSessionFactory,
-  accountDao: AccountDao
+  accountDao: AccountDao,
+  accountAccessDao: AccountAccessDao,
+  @Named("accountAccessCookieFactory") accountAccessCookieFactory: CookieFactory
 ) extends ActionRefiner[UserRequest, MemberRequest] {
 
   override protected def refine[A](
     request: UserRequest[A]
   ): Future[Either[Result, MemberRequest[A]]] = Future.successful {
 
-    val userLoginSession = userSessionFactory.create("UserLogin")
+    val accountIdOpt = userSessionFactory.create("UserLogin")
       .read(request.sessionId)
+      .get("accountId")
+      .flatMap(x => Try(x.toLong).toOption)
+      .orElse {
+        for {
+          cookie <- request.cookies.get(accountAccessCookieFactory.name)
+          a <- accountAccessDao.find(cookie.value)
+        } yield a.accountId
+      }
 
     val accountOpt = for {
-      idString <- userLoginSession.get("accountId")
-      a <- accountDao.find(idString.toLong) if a.status == Account.Status.Active
+      accountId <- accountIdOpt
+      a <- accountDao.find(accountId) if a.status == Account.Status.Active
     } yield a
 
     accountOpt.map { account =>

@@ -14,6 +14,7 @@ GET     /account/activate                        controllers.AccountController.a
 GET     /account/error/*name                     controllers.AccountController.error(name: String)
 
 GET     /dashboard                               controllers.DashboardController.index()
+GET     /dashboard/access                        controllers.DashboardController.access()
 
 GET     /phrase                                  controllers.PhraseController.index()
 POST    /phrase/search                           controllers.PhraseController.search()

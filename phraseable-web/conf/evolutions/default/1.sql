@@ -38,6 +38,16 @@ CREATE TABLE `account` (
 );
 CREATE INDEX `idx_account_01` ON `account` (`email`);
 
+CREATE TABLE `account_access` (
+  `code` VARCHAR(255) NOT NULL DEFAULT '',
+  `account_id` BIGINT NOT NULL,
+  `user_agent` TEXT,
+  `remote_address` VARCHAR(40) NOT NULL DEFAULT '',
+  `created_at` TIMESTAMP,
+  PRIMARY KEY (`code`)
+);
+CREATE INDEX `idx_account_access_01` ON `account_access` (`account_id`);
+
 CREATE TABLE `phrase` (
   `id` BIGINT NOT NULL,
   `lang` CHAR(2) NOT NULL,
@@ -71,6 +81,7 @@ DROP TABLE `session_storage`;
 DROP TABLE `verification_storage`;
 DROP TABLE `id_sequence`;
 DROP TABLE `account`;
+DROP TABLE `account_access`;
 DROP TABLE `phrase`;
 DROP TABLE `category`;
 DROP TABLE `rel_phrase_category`;

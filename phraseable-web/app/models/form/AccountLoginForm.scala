@@ -8,7 +8,7 @@ case class AccountLoginForm(
   email: String = "",
   password: String = "",
   returnTo: Option[String] = None,
-  keepMeLoggedIn: Int = 0,
+  keepMeLoggedIn: Boolean = false,
   authorized: Boolean = true
 )
 
@@ -23,7 +23,7 @@ object AccountLoginForm extends NormalizationSupport {
       "email" -> text.verifying(nonBlank("AccountLoginForm.error.email")),
       "password" -> text.verifying(nonBlank("AccountLoginForm.error.password")),
       "returnTo" -> optional(text),
-      "keepMeLoggedIn" -> default(number, 0),
+      "keepMeLoggedIn" -> default(of[Boolean], false),
       "authorized" -> default(of[Boolean], true)
         .verifying(passed("AccountLoginForm.error.authorized"))
     )(AccountLoginForm.apply)(AccountLoginForm.unapply)
