@@ -85,7 +85,8 @@ class AccountAccessDao @Inject() (
         .on('accountId -> entity.accountId)
         .as(SqlParser.str("code").*)
         .drop(maxRows - 1)
-      deleteByCodesQuery.on('removableCodes -> removableCode).execute()
+      if (!removableCode.isEmpty)
+        deleteByCodesQuery.on('removableCodes -> removableCode).execute()
     }
     // and then insert it
     create(entity)
@@ -93,9 +94,9 @@ class AccountAccessDao @Inject() (
 
   private val selectByAccountIdQuery = SQL(
     s"""
-      |SELECT * FROM account_access
-      | WHERE account_id = {accountId}
-      | ORDER BY created_at DESC
+       |SELECT * FROM account_access
+       | WHERE account_id = {accountId}
+       | ORDER BY created_at DESC
     """.stripMargin
   )
 
