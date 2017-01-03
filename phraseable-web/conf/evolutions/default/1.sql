@@ -59,6 +59,13 @@ CREATE TABLE `phrase` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+CREATE TABLE `phrase_keyword` (
+  `phrase_id` BIGINT NOT NULL,
+  `keyword` VARCHAR(255) NOT NULL default ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE INDEX `idx_phrase_keyword_01` ON `phrase_keyword` (`phrase_id`);
+CREATE INDEX `idx_phrase_keyword_02` ON `phrase_keyword` (`keyword`);
+
 CREATE TABLE `category` (
   `id` BIGINT NOT NULL,
   `title` VARCHAR(255) NOT NULL UNIQUE,
@@ -84,5 +91,6 @@ DROP TABLE `id_sequence`;
 DROP TABLE `account`;
 DROP TABLE `account_access`;
 DROP TABLE `phrase`;
+DROP TABLE `phrase_keyword`;
 DROP TABLE `category`;
 DROP TABLE `rel_phrase_category`;

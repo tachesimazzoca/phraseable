@@ -2,12 +2,17 @@ package models
 
 import javax.inject.Inject
 
+import scala.collection.mutable.ArrayBuffer
+
 class PhraseService @Inject() (
   idSequenceDao: IdSequenceDao,
   phraseDao: PhraseDao,
   categoryDao: CategoryDao,
-  relPhraseCategoryDao: RelPhraseCategoryDao
+  relPhraseCategoryDao: RelPhraseCategoryDao,
+  phraseKeywordDao: PhraseKeywordDao
 ) {
+
+  import PhraseService._
 
   def find(id: Long): Option[(Phrase, Seq[Category])] =
     phraseDao.find(id).map { phrase =>
@@ -33,7 +38,11 @@ class PhraseService @Inject() (
   ): Option[(Phrase, Seq[Category])] = {
     phraseDao.create(phrase)
     updateRelPhraseCategoryRows(phrase.id, categoryTitles)
-    find(phrase.id)
+    val saved = find(phrase.id)
+    saved.foreach { x =>
+      updateKeywords(x._1, x._2)
+    }
+    saved
   }
 
   def update(
@@ -41,7 +50,11 @@ class PhraseService @Inject() (
   ): Option[(Phrase, Seq[Category])] = {
     phraseDao.update(phrase)
     updateRelPhraseCategoryRows(phrase.id, categoryTitles)
-    find(phrase.id)
+    val saved = find(phrase.id)
+    saved.foreach { x =>
+      updateKeywords(x._1, x._2)
+    }
+    saved
   }
 
   def nextPhraseId(): Long = idSequenceDao.nextId(IdSequence.SequenceType.Phrase)
@@ -58,5 +71,37 @@ class PhraseService @Inject() (
       }
     }
     relPhraseCategoryDao.updateByPhraseId(phraseId, categoryIds)
+  }
+
+  private def updateKeywords(phrase: Phrase, categories: Seq[Category]): Unit = {
+    val keywords = new ArrayBuffer[String]
+    // Regard a single word as a keyword
+    if (!phrase.term.contains(" ")) {
+      keywords.append(phrase.term)
+    } else {
+      keywords.append(parseKeywords(phrase.term): _*)
+    }
+    if (!phrase.translation.contains(" ")) {
+      keywords.append(phrase.translation)
+    } else {
+      keywords.append(parseKeywords(phrase.translation): _*)
+    }
+    categories.foreach { x =>
+      keywords.append(x.title)
+    }
+    phraseKeywordDao.updateKeywords(phrase.id, keywords.toSet.toSeq)
+  }
+}
+
+object PhraseService {
+
+  private val KEYWORD_BRACKET_PATTERN = """\{([^\{\}]+)\}""".r
+  private val KEYWORD_SEPARATOR_PATTERN = "[\\|, ]"
+
+  def parseKeywords(data: String): Seq[String] = {
+    // Parse keyword brackets notation { foo | bar }
+    KEYWORD_BRACKET_PATTERN.findAllIn(data).matchData.flatMap { md =>
+      md.group(1).split(KEYWORD_SEPARATOR_PATTERN).filter(!_.isEmpty)
+    }.toList
   }
 }

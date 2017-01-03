@@ -84,29 +84,33 @@ class PhraseSelectDao @Inject() (
           SELECT phrase_id
           FROM rel_phrase_category
           WHERE
-            category_id IN ({categoryIds})
+            category_id IN ({category_id})
           GROUP BY phrase_id
         )
         """
       )
-      bindValues.append('categoryIds -> condition.categoryIds)
+      bindValues.append('category_id -> condition.categoryIds)
     }
     // keywords
     if (!condition.keywords.isEmpty) {
-      val pairs = new ArrayBuffer[String]
-      condition.keywords.foldLeft(0) { (idx, x) =>
-        val k = "termKeyword_%d".format(idx)
-        pairs.append(s"term LIKE {${k}}")
-        bindValues.append(Symbol(k) -> s"%${x}%")
-        idx + 1
+      val pairs = new ArrayBuffer[String];
+      condition.keywords.foldLeft(0) { (i, x) =>
+        val k = s"keyword_${i}"
+        pairs.append(s"keyword LIKE {${k}}")
+        bindValues.append(Symbol(k) -> s"${x}%")
+        i + 1
       }
-      condition.keywords.foldLeft(0) { (idx, x) =>
-        val k = "translationKeyword_%d".format(idx)
-        pairs.append(s"translation LIKE {${k}}")
-        bindValues.append(Symbol(k) -> s"%${x}%")
-        idx + 1
-      }
-      whereConditions.append(pairs.mkString(" OR "))
+      val whereKeyword = pairs.mkString(" OR ")
+      whereConditions.append(
+        s"""
+        id IN (
+          SELECT phrase_id
+          FROM phrase_keyword
+          WHERE ${whereKeyword}
+          GROUP BY phrase_id
+        )
+        """
+      )
     }
 
     val whereClause =
