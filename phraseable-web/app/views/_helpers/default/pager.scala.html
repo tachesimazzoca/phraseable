@@ -5,25 +5,23 @@
 ) { u =>
   <div class="form-group clearfix">
     <div class="pull-right">
-      @if(pagination.count > pagination.limit) {
-        <strong>@{pagination.offset + 1}</strong> - <strong>@{
-          math.min(pagination.count, pagination.offset + pagination.limit)
-        }</strong> of <strong>@{pagination.count}</strong>&nbsp;&nbsp;
-        <div class="btn-group">
-        @if((pagination.offset - pagination.limit) >= 0) {
-          <a class="btn btn-default"
-             href="@{u}offset=@{pagination.offset - pagination.limit}&limit=@{pagination.limit}">Prev</a>
-        } else {
-          <button type="button" class="btn btn-default disabled">Prev</button>
-        }
-        @if((pagination.offset + pagination.limit) < pagination.count) {
-          <a class="btn btn-default"
-             href="@{u}offset=@{pagination.offset + pagination.limit}&limit=@{pagination.limit}">Next</a>
-        } else {
-          <button type="button" class="btn btn-default disabled">Next</button>
-        }
-        </div>
+      <strong>@{pagination.offset + 1}</strong> - <strong>@{
+        math.min(pagination.count, pagination.offset + pagination.limit)
+      }</strong> of <strong>@{pagination.count}</strong>&nbsp;&nbsp;
+      <div class="btn-group">
+      @if((pagination.offset - pagination.limit) >= 0) {
+        <a class="btn btn-default"
+           href="@{u}offset=@{pagination.offset - pagination.limit}&limit=@{pagination.limit}">Prev</a>
+      } else {
+        <button type="button" class="btn btn-default disabled">Prev</button>
       }
+      @if((pagination.offset + pagination.limit) < pagination.count) {
+        <a class="btn btn-default"
+           href="@{u}offset=@{pagination.offset + pagination.limit}&limit=@{pagination.limit}">Next</a>
+      } else {
+        <button type="button" class="btn btn-default disabled">Next</button>
+      }
+      </div>
       <div class="btn-group">
         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
           <span class="caret"></span>
