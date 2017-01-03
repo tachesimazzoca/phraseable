@@ -23,7 +23,7 @@ class PhraseController @Inject() (
   private val FLASH_POST_EDIT = "PhraseController.postEdit"
   private val FLASH_POST_UPLOAD = "PhraseController.postUpload"
 
-  private val DEFAULT_PHRASE_SELECT_LIMIT = 20
+  private val DEFAULT_PHRASE_SELECT_LIMIT = 50
   private val DEFAULT_PHRASE_SELECT_ORDER_BY = PhraseSelectDao.OrderBy.TermAsc
   private val PHRASE_SELECT_ORDER_BY_MAP = Map(
     "content_asc" -> PhraseSelectDao.OrderBy.TermAsc
