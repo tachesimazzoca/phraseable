@@ -14,8 +14,10 @@ class PhraseUploadService @Inject() (
 ) {
 
   val csvFormat = CSVFormat.DEFAULT.withDelimiter('\t')
-    .withHeader("content", "definition", "description", "categories")
+    .withHeader("id", "lang", "content", "definition", "description", "categories")
     .withSkipHeaderRecord()
+
+  private val MAX_ERROR_REPORTING = 10
 
   def upload(
     input: InputStream,
@@ -31,7 +33,8 @@ class PhraseUploadService @Inject() (
       val m = row.toMap.toMap
       PhraseEditForm.defaultForm.bind(
         Map(
-          "lang" -> "en",
+          "id" -> m.getOrElse("id", ""),
+          "lang" -> m.getOrElse("lang", Phrase.Lang.English.name),
           "content" -> m.getOrElse("content", ""),
           "definition" -> m.getOrElse("definition", ""),
           "description" -> m.getOrElse("description", ""),
@@ -39,18 +42,32 @@ class PhraseUploadService @Inject() (
         )
       ).fold(
         form => {
-          if (errors.size < 10)
+          if (errors.size < MAX_ERROR_REPORTING)
             errors.append(m)
         },
         data => {
-          val phraseId = phraseService.nextPhraseId()
-          phraseService.create(
-            Phrase(
-              phraseId, Phrase.Lang.fromName(data.lang),
-              data.content, data.definition, data.description
-            ),
-            data.categoryTitles
-          )
+          data.id.map { phraseId =>
+            phraseService.find(phraseId).map { case (phrase, _) =>
+              phraseService.update(
+                phrase.copy(
+                  lang = Phrase.Lang.fromName(data.lang),
+                  content = data.content,
+                  definition = data.definition,
+                  description = data.description
+                ),
+                data.categoryTitles
+              )
+            }
+          }.getOrElse {
+            val phraseId = phraseService.nextPhraseId()
+            phraseService.create(
+              Phrase(
+                phraseId, Phrase.Lang.fromName(data.lang),
+                data.content, data.definition, data.description
+              ),
+              data.categoryTitles
+            )
+          }
           n = n + 1
         }
       )
