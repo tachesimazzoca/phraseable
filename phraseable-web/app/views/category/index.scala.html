@@ -19,6 +19,9 @@
     @pager(pagination, routes.CategoryController.index().path())
 
     <table class="table">
+      <tr>
+        <th colspan="2">Title</th>
+      </tr>
       @for(row <- pagination.rows) {
       <tr>
         <td>
