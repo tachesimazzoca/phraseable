@@ -2,12 +2,12 @@ package models.form
 
 import play.api.data.Forms._
 import play.api.data._
-import play.api.data.format.Formats._
 
 case class CategoryEditForm(
   id: Option[Long],
   title: String,
-  description: String
+  description: String,
+  uniqueTitle: Boolean = true
 )
 
 object CategoryEditForm extends NormalizationSupport {
@@ -18,9 +18,11 @@ object CategoryEditForm extends NormalizationSupport {
 
   private val form = Form(
     mapping(
-      "id" -> optional(of[Long]),
+      "id" -> optional(longNumber),
       "title" -> text.verifying(nonBlank("CategoryEditForm.error.title")),
-      "description" -> text
+      "description" -> text,
+      "uniqueTitle" -> default(boolean, true)
+        .verifying(passed("CategoryEditForm.error.uniqueTitle"))
     )(CategoryEditForm.apply)(CategoryEditForm.unapply)
   )
 
@@ -28,4 +30,6 @@ object CategoryEditForm extends NormalizationSupport {
 
   def fromRequest(implicit request: play.api.mvc.Request[_]): Form[CategoryEditForm] =
     form.bindFromRequest(normalize(request))
+
+  def unbind(data: CategoryEditForm): Map[String, String] = form.mapping.unbind(data)
 }

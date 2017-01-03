@@ -61,12 +61,13 @@ CREATE TABLE `phrase` (
 
 CREATE TABLE `category` (
   `id` BIGINT NOT NULL,
-  `title` TEXT,
+  `title` VARCHAR(255) NOT NULL UNIQUE,
   `description` TEXT,
   `created_at` TIMESTAMP,
   `updated_at` TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE INDEX `idx_category_01` ON `category` (`title`);
 
 CREATE TABLE `rel_phrase_category` (
   `phrase_id` BIGINT NOT NULL,

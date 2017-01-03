@@ -1,5 +1,6 @@
 @(category: models.Category, phraseSelectPagination: components.util.Pagination[models.PhraseSelect])
 
+@import _helpers.default._
 @import _helpers.markdown._
 
 @_layouts.default(Some(category.title)) {
@@ -16,6 +17,9 @@
 
   @if(!phraseSelectPagination.rows.isEmpty) {
     <h3>Related Phrases</h3>
+
+    @pager(phraseSelectPagination, routes.CategoryController.detail(category.id).path())
+
     <table class="table">
       <tr>
         <th>Term</th>
@@ -33,5 +37,6 @@
       </tr>
       }
     </table>
+
   }
 }

@@ -11,3 +11,4 @@ PhraseEditForm.error.lang=Lang must not be selected.
 PhraseEditForm.error.term=Content must not be blank.
 
 CategoryEditForm.error.title=Title must not be blank.
+CategoryEditForm.error.uniqueTitle=The given Title has been registered.

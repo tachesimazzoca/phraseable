@@ -3,18 +3,37 @@
 @defining(
   if (url.contains("?")) url + "&" else url + "?"
 ) { u =>
-  @if(pagination.count > pagination.limit) {
-    <ul class="pager">
-      @if((pagination.offset - pagination.limit) >= 0) {
-        <li><a href="@{u}offset=@{pagination.offset - pagination.limit}&limit=@{pagination.limit}">Prev</a></li>
-      } else {
-        <li class="disabled"><a href="#">Prev</a></li>
+  <div class="form-group clearfix">
+    <div class="pull-right">
+      @if(pagination.count > pagination.limit) {
+        <strong>@{pagination.offset + 1}</strong> - <strong>@{
+          math.min(pagination.count, pagination.offset + pagination.limit)
+        }</strong> of <strong>@{pagination.count}</strong>&nbsp;&nbsp;
+        <div class="btn-group">
+        @if((pagination.offset - pagination.limit) >= 0) {
+          <a class="btn btn-default"
+             href="@{u}offset=@{pagination.offset - pagination.limit}&limit=@{pagination.limit}">Prev</a>
+        } else {
+          <button type="button" class="btn btn-default disabled">Prev</button>
+        }
+        @if((pagination.offset + pagination.limit) < pagination.count) {
+          <a class="btn btn-default"
+             href="@{u}offset=@{pagination.offset + pagination.limit}&limit=@{pagination.limit}">Next</a>
+        } else {
+          <button type="button" class="btn btn-default disabled">Next</button>
+        }
+        </div>
       }
-      @if((pagination.offset + pagination.limit) < pagination.count) {
-        <li><a href="@{u}offset=@{pagination.offset + pagination.limit}&limit=@{pagination.limit}">Next</a></li>
-      } else {
-        <li class="disabled"><a href="#">Next</a></li>
-      }
-    </ul>
-  }
+      <div class="btn-group">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right">
+        @for(n <- Seq(10, 20, 50, 100)) {
+          <li><a href="@{u}offset=0&limit=@{n}">@n</a></li>
+        }
+        </ul>
+      </div>
+    </div>
+  </div>
 }
