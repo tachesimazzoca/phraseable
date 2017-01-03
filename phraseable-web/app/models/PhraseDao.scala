@@ -17,8 +17,8 @@ class PhraseDao @Inject() (
   val idColumn = "id"
 
   val columns = Seq(
-    "id", "lang", "content",
-    "definition", "description",
+    "id", "lang", "term",
+    "translation", "description",
     "created_at", "updated_at"
   )
 
@@ -27,16 +27,16 @@ class PhraseDao @Inject() (
   override val rowParser: RowParser[Phrase] = {
     SqlParser.get[Long]("id") ~
       SqlParser.get[String]("lang") ~
-      SqlParser.get[String]("content") ~
-      SqlParser.get[String]("definition") ~
+      SqlParser.get[String]("term") ~
+      SqlParser.get[String]("translation") ~
       SqlParser.get[String]("description") ~
       SqlParser.get[Option[java.util.Date]]("created_at") ~
       SqlParser.get[Option[java.util.Date]]("updated_at") map {
-      case id ~ language ~ content ~ definition ~ description ~ createdAt ~ updatedAt =>
+      case id ~ language ~ term ~ translation ~ description ~ createdAt ~ updatedAt =>
         Phrase(id,
           Phrase.Lang.fromName(language),
-          content,
-          definition,
+          term,
+          translation,
           description,
           createdAt.map(asDate),
           updatedAt.map(asDate))
@@ -47,8 +47,8 @@ class PhraseDao @Inject() (
     Seq[NamedParameter](
       'id -> phrase.id,
       'lang -> phrase.lang.name,
-      'content -> phrase.content,
-      'definition -> phrase.definition,
+      'term -> phrase.term,
+      'translation -> phrase.translation,
       'description -> phrase.description,
       'created_at -> phrase.createdAt,
       'updated_at -> phrase.updatedAt

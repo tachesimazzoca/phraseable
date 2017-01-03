@@ -2,9 +2,9 @@
 
 @import _helpers.markdown._
 
-@_layouts.default(Some(phrase.content)) {
+@_layouts.default(Some(phrase.term)) {
 
-  <div class="well">@phrase.definition</div>
+  <div class="well">@phrase.translation</div>
 
   <div>@Html(md2html(phrase.description))</div>
 

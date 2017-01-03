@@ -8,6 +8,6 @@ AccountCreateForm.error.retypedPassword=Re-typed Password must be equal to the P
 AccountCreateForm.error.uniqueEmail=The given E-mail Address has been registered.
 
 PhraseEditForm.error.lang=Lang must not be selected.
-PhraseEditForm.error.content=Content must not be blank.
+PhraseEditForm.error.term=Content must not be blank.
 
 CategoryEditForm.error.title=Title must not be blank.

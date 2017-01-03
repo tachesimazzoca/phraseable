@@ -24,10 +24,9 @@ class PhraseController @Inject() (
   private val FLASH_POST_UPLOAD = "PhraseController.postUpload"
 
   private val DEFAULT_PHRASE_SELECT_LIMIT = 20
-  private val DEFAULT_PHRASE_SELECT_ORDER_BY = PhraseSelectDao.OrderBy.ContentAsc
+  private val DEFAULT_PHRASE_SELECT_ORDER_BY = PhraseSelectDao.OrderBy.TermAsc
   private val PHRASE_SELECT_ORDER_BY_MAP = Map(
-    "id_asc" -> PhraseSelectDao.OrderBy.IdAsc,
-    "content_asc" -> PhraseSelectDao.OrderBy.ContentAsc
+    "content_asc" -> PhraseSelectDao.OrderBy.TermAsc
   )
   lazy private val phraseSearchSession = userSessionFactory.create("PhraseSearch")
 
@@ -87,8 +86,8 @@ class PhraseController @Inject() (
     id.map { phraseId =>
       phraseService.find(phraseId).map { case (phrase, categories) =>
         val data = PhraseEditForm(
-          Some(phrase.id), phrase.lang.name, phrase.content,
-          phrase.definition, phrase.description,
+          Some(phrase.id), phrase.lang.name, phrase.term,
+          phrase.translation, phrase.description,
           categories.map(_.title)
         )
         Ok(views.html.phrase.edit(PhraseEditForm.defaultForm.fill(data), flash))
@@ -110,8 +109,8 @@ class PhraseController @Inject() (
             phraseService.update(
               phrase.copy(
                 lang = Phrase.Lang.fromName(data.lang),
-                content = data.content,
-                definition = data.definition,
+                term = data.term,
+                translation = data.translation,
                 description = data.description
               ),
               data.categoryTitles
@@ -128,7 +127,7 @@ class PhraseController @Inject() (
           val phraseId = phraseService.nextPhraseId()
           phraseService.create(
             Phrase(phraseId, Phrase.Lang.fromName(data.lang),
-              data.content, data.definition, data.description),
+              data.term, data.translation, data.description),
             data.categoryTitles
           )
           Redirect(routes.PhraseController.edit(Some(phraseId)))
@@ -140,7 +139,7 @@ class PhraseController @Inject() (
 
   def upload = (userAction andThen memberAction) { implicit request =>
     val flash = request.flash.data.get(FLASH_POST_UPLOAD)
-    Ok(views.html.phrase.upload(PhraseUploadForm.defaultForm, flash))
+    Ok(views.html.phrase.upload(PhraseUploadForm.defaultForm, Seq.empty, flash))
   }
 
   def postUpload = (userAction andThen memberAction) (
@@ -156,9 +155,14 @@ class PhraseController @Inject() (
         form => BadRequest(views.html.phrase.upload(form)),
         data => {
           val file = tempFile.ref.file
-          phraseUploader.upload(new java.io.FileInputStream(file), data.truncate)
+          val uploaded = phraseUploader.upload(new java.io.FileInputStream(file), data.truncate)
           file.delete()
-          Redirect(routes.PhraseController.upload()).flashing(FLASH_POST_UPLOAD -> "uploaded")
+          uploaded match {
+            case Left(x) =>
+              BadRequest(views.html.phrase.upload(PhraseUploadForm.defaultForm, x))
+            case Right(_) =>
+              Redirect(routes.PhraseController.upload()).flashing(FLASH_POST_UPLOAD -> "uploaded")
+          }
         }
       )
     }.getOrElse {

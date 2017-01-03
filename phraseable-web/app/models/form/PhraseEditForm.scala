@@ -9,8 +9,8 @@ import play.api.data.format.Formats._
 case class PhraseEditForm(
   id: Option[Long],
   lang: String,
-  content: String,
-  definition: String,
+  term: String,
+  translation: String,
   description: String,
   categoryTitles: Seq[String] = Seq.empty
 )
@@ -27,23 +27,23 @@ object PhraseEditForm extends NormalizationSupport {
     mapping(
       "id" -> optional(of[Long]),
       "lang" -> text.verifying(nonBlank("PhraseEditForm.error.lang")),
-      "content" -> text.verifying(nonBlank("PhraseEditForm.error.content")),
-      "definition" -> text,
+      "term" -> text.verifying(nonBlank("PhraseEditForm.error.term")),
+      "translation" -> text,
       "description" -> text,
       "categoryTitlesText" -> text
     ) {
       // apply
       (
-        id: Option[Long], lang: String, content: String,
-        definition: String, description: String, categoryTitlesText: String
+        id: Option[Long], lang: String, term: String,
+        translation: String, description: String, categoryTitlesText: String
       ) =>
         val categoryTitles = categoryTitlesText.split(CATEGORY_TAG_SEPARATOR)
           .map(StringUtils.stripToEmpty).filter(!_.isEmpty)
-        PhraseEditForm(id, lang, content, definition, description, categoryTitles)
+        PhraseEditForm(id, lang, term, translation, description, categoryTitles)
     } {
       // unapply
       a: PhraseEditForm =>
-        Some(a.id, a.lang, a.content, a.definition, a.description,
+        Some(a.id, a.lang, a.term, a.translation, a.description,
           a.categoryTitles.map(StringUtils.stripToEmpty).mkString(CATEGORY_TAG_SEPARATOR))
     }
   )

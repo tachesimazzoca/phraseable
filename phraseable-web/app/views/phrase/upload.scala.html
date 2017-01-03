@@ -1,4 +1,8 @@
-@(form: Form[models.form.PhraseUploadForm], flash: Option[String] = None)(implicit messages: Messages)
+@(
+  form: Form[models.form.PhraseUploadForm],
+  errors: Seq[Form[models.form.PhraseEditForm]] = Seq.empty,
+  flash: Option[String] = None
+)(implicit messages: Messages)
 
 @import _helpers.default._
 @import play.api.i18n.Messages
@@ -18,11 +22,28 @@
     </ul>
   </div>
   }
+  @if(!errors.isEmpty) {
+  <p>The uploaded file contains the following errors.</p>
+  <div class="alert alert-danger">
+    @for(formWithErr <- errors) {
+    <dl>
+      <dt><code>@formWithErr.data</code></dt>
+      <dd>
+        <ul>
+          @for(err <- formWithErr.errors) {
+          <li>@Messages(err.message, err.args: _*)</li>
+          }
+        </ul>
+      </dd>
+    </dl>
+    }
+  </div>
+  }
 
   <div style="max-width: 600px">
   @helper.form(routes.PhraseController.postUpload(), 'enctype -> "multipart/form-data") {
     <div class="form-group">
-      <label>File</label>
+      <label>Select a file in .tsv format</label>
       <input type="file" name="data">
     </div>
     <div class="checkbox">

@@ -42,19 +42,19 @@ class PhraseSelectDaoSuite extends FunSuite {
         0, 10, Some(PhraseSelectDao.OrderBy.IdAsc))
       assert(Seq(1L, 2L, 3L, 4L) === orderById.rows.map(_.id))
 
-      val orderByContent = phraseSelectDao.selectByCondition(
+      val orderByTerm = phraseSelectDao.selectByCondition(
         PhraseSelectDao.Condition(),
-        0, 10, Some(PhraseSelectDao.OrderBy.ContentAsc))
-      assert(Seq(3L, 4L, 1L, 2L) === orderByContent.rows.map(_.id))
+        0, 10, Some(PhraseSelectDao.OrderBy.TermAsc))
+      assert(Seq(3L, 4L, 1L, 2L) === orderByTerm.rows.map(_.id))
 
       val filteredByCategoryIds = phraseSelectDao.selectByCondition(
         PhraseSelectDao.Condition(Seq(3L)),
-        0, 10, Some(PhraseSelectDao.OrderBy.ContentAsc))
+        0, 10, Some(PhraseSelectDao.OrderBy.TermAsc))
       assert(Seq(3L, 2L) === filteredByCategoryIds.rows.map(_.id))
 
       val filteredByKeywords = phraseSelectDao.selectByCondition(
         PhraseSelectDao.Condition(keywords = Seq("b")),
-        0, 10, Some(PhraseSelectDao.OrderBy.ContentAsc))
+        0, 10, Some(PhraseSelectDao.OrderBy.TermAsc))
       assert(Seq(4L, 1L) === filteredByKeywords.rows.map(_.id))
     }
   }

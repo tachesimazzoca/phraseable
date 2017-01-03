@@ -18,13 +18,13 @@
     <h3>Related Phrases</h3>
     <table class="table">
       <tr>
-        <th>Content</th>
-        <th colspan="2">Definition</th>
+        <th>Term</th>
+        <th colspan="2">Translation</th>
       </tr>
       @for(row <- phraseSelectPagination.rows) {
       <tr>
-        <td><a href="@routes.PhraseController.detail(row.id)">@row.content</a></td>
-        <td>@row.definition</td>
+        <td><a href="@routes.PhraseController.detail(row.id)">@row.term</a></td>
+        <td>@row.translation</td>
         <td align="right">
           <a class="btn btn-default" href="@routes.PhraseController.edit(Some(row.id))">
             <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>

@@ -10,8 +10,8 @@ import scala.collection.mutable.ArrayBuffer
 
 case class PhraseSelect(
   id: Long,
-  content: String,
-  definition: String,
+  term: String,
+  translation: String,
   description: String
 )
 
@@ -23,7 +23,7 @@ object PhraseSelectDao {
 
     case object IdAsc extends OrderBy("id ASC")
 
-    case object ContentAsc extends OrderBy("content ASC")
+    case object TermAsc extends OrderBy("term ASC")
 
   }
 
@@ -31,6 +31,7 @@ object PhraseSelectDao {
     categoryIds: Seq[Long] = Seq.empty,
     keywords: Seq[String] = Seq.empty
   )
+
 }
 
 class PhraseSelectDao @Inject() (
@@ -59,11 +60,11 @@ class PhraseSelectDao @Inject() (
 
   private val rowParser: RowParser[PhraseSelect] = {
     SqlParser.get[Long]("id") ~
-      SqlParser.get[String]("content") ~
-      SqlParser.get[String]("definition") ~
+      SqlParser.get[String]("term") ~
+      SqlParser.get[String]("translation") ~
       SqlParser.get[String]("description") map {
-      case id ~ content ~ definition ~ description =>
-        PhraseSelect(id, content, definition, description)
+      case id ~ term ~ translation ~ description =>
+        PhraseSelect(id, term, translation, description)
     }
   }
 
@@ -94,14 +95,14 @@ class PhraseSelectDao @Inject() (
     if (!condition.keywords.isEmpty) {
       val pairs = new ArrayBuffer[String]
       condition.keywords.foldLeft(0) { (idx, x) =>
-        val k = "contentKeyword_%d".format(idx)
-        pairs.append(s"content LIKE {${k}}")
+        val k = "termKeyword_%d".format(idx)
+        pairs.append(s"term LIKE {${k}}")
         bindValues.append(Symbol(k) -> s"%${x}%")
         idx + 1
       }
       condition.keywords.foldLeft(0) { (idx, x) =>
-        val k = "definitionKeyword_%d".format(idx)
-        pairs.append(s"definition LIKE {${k}}")
+        val k = "translationKeyword_%d".format(idx)
+        pairs.append(s"translation LIKE {${k}}")
         bindValues.append(Symbol(k) -> s"%${x}%")
         idx + 1
       }
@@ -111,7 +112,7 @@ class PhraseSelectDao @Inject() (
     val whereClause =
       if (whereConditions.isEmpty) ""
       else "WHERE " + whereConditions.mkString(" AND ")
-    val orderByClause = orderBy.getOrElse(OrderBy.ContentAsc).clause
+    val orderByClause = orderBy.getOrElse(OrderBy.TermAsc).clause
 
     Pagination.paginate(offset, limit,
       count = () =>

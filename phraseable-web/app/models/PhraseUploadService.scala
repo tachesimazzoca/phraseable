@@ -5,6 +5,7 @@ import javax.inject.Inject
 
 import models.form.PhraseEditForm
 import org.apache.commons.csv.CSVFormat
+import play.api.data.Form
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
@@ -14,20 +15,20 @@ class PhraseUploadService @Inject() (
 ) {
 
   val csvFormat = CSVFormat.DEFAULT.withDelimiter('\t')
-    .withHeader("id", "lang", "content", "definition", "description", "categories")
-    .withSkipHeaderRecord()
+    .withFirstRecordAsHeader()
+    .withSkipHeaderRecord(true)
 
   private val MAX_ERROR_REPORTING = 10
 
   def upload(
     input: InputStream,
     truncate: Boolean = false
-  ): Either[Seq[Map[String, String]], Int] = {
+  ): Either[Seq[Form[PhraseEditForm]], Int] = {
 
     if (truncate)
       phraseService.truncate()
 
-    val errors = new ArrayBuffer[Map[String, String]]
+    val errors = new ArrayBuffer[Form[PhraseEditForm]]
     var n = 0
     for (row <- csvFormat.parse(new InputStreamReader(input))) {
       val m = row.toMap.toMap
@@ -35,15 +36,15 @@ class PhraseUploadService @Inject() (
         Map(
           "id" -> m.getOrElse("id", ""),
           "lang" -> m.getOrElse("lang", Phrase.Lang.English.name),
-          "content" -> m.getOrElse("content", ""),
-          "definition" -> m.getOrElse("definition", ""),
+          "term" -> m.getOrElse("term", ""),
+          "translation" -> m.getOrElse("translation", ""),
           "description" -> m.getOrElse("description", ""),
           "categoryTitlesText" -> m.getOrElse("categories", "")
         )
       ).fold(
         form => {
           if (errors.size < MAX_ERROR_REPORTING)
-            errors.append(m)
+            errors.append(form)
         },
         data => {
           data.id.map { phraseId =>
@@ -51,8 +52,8 @@ class PhraseUploadService @Inject() (
               phraseService.update(
                 phrase.copy(
                   lang = Phrase.Lang.fromName(data.lang),
-                  content = data.content,
-                  definition = data.definition,
+                  term = data.term,
+                  translation = data.translation,
                   description = data.description
                 ),
                 data.categoryTitles
@@ -63,7 +64,7 @@ class PhraseUploadService @Inject() (
             phraseService.create(
               Phrase(
                 phraseId, Phrase.Lang.fromName(data.lang),
-                data.content, data.definition, data.description
+                data.term, data.translation, data.description
               ),
               data.categoryTitles
             )
