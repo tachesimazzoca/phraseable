@@ -2,7 +2,6 @@ package models.form
 
 import play.api.data.Forms._
 import play.api.data._
-import play.api.data.format.Formats._
 
 case class AccountCreateForm(email: String, password: String)
 
@@ -20,7 +19,7 @@ object AccountCreateForm extends NormalizationSupport {
         "main" -> text.verifying(password("AccountCreateForm.error.password")),
         "confirmation" -> text
       ).verifying(sameValue("AccountCreateForm.error.retypedPassword")),
-      "uniqueEmail" -> default(of[Boolean], true).verifying(
+      "uniqueEmail" -> default(boolean, true).verifying(
         passed("AccountCreateForm.error.uniqueEmail"))
     ) { (email, passwords, _) =>
       AccountCreateForm(email, passwords._1)

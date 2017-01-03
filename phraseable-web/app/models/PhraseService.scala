@@ -75,17 +75,22 @@ class PhraseService @Inject() (
 
   private def updateKeywords(phrase: Phrase, categories: Seq[Category]): Unit = {
     val keywords = new ArrayBuffer[String]
-    // Regard a single word as a keyword
+
+    // phrase.term
     if (!phrase.term.contains(" ")) {
       keywords.append(phrase.term)
     } else {
       keywords.append(parseKeywords(phrase.term): _*)
     }
+    // phrase.translation
     if (!phrase.translation.contains(" ")) {
       keywords.append(phrase.translation)
     } else {
       keywords.append(parseKeywords(phrase.translation): _*)
     }
+    // phrase.description
+    keywords.append(parseKeywords(phrase.description): _*)
+
     phraseKeywordDao.updateKeywords(phrase.id, keywords.toSet.toSeq)
   }
 }
@@ -93,12 +98,12 @@ class PhraseService @Inject() (
 object PhraseService {
 
   private val KEYWORD_BRACKET_PATTERN = """\{([^\{\}]+)\}""".r
-  private val KEYWORD_SEPARATOR_PATTERN = "[\\|, ]"
+  private val KEYWORD_SEPARATOR_PATTERN = "[\\|,]"
 
   def parseKeywords(data: String): Seq[String] = {
     // Parse keyword brackets notation { foo | bar }
     KEYWORD_BRACKET_PATTERN.findAllIn(data).matchData.flatMap { md =>
-      md.group(1).split(KEYWORD_SEPARATOR_PATTERN).filter(!_.isEmpty)
+      md.group(1).split(KEYWORD_SEPARATOR_PATTERN).map(_.trim).filter(!_.isEmpty)
     }.toList
   }
 }

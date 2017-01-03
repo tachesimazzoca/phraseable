@@ -6,7 +6,7 @@ import components.util.Pagination
 import controllers.action.{MemberAction, UserAction}
 import controllers.session.UserSessionFactory
 import models._
-import models.form.{PhraseEditForm, PhraseSearchForm, PhraseUploadForm}
+import models.form.{KeywordSearchForm, PhraseEditForm, PhraseUploadForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Controller
 
@@ -32,9 +32,9 @@ class PhraseController @Inject() (
 
   def index() = userAction { implicit userRequest =>
     // Merge saved search session with query parameters
-    val saved = PhraseSearchForm.defaultForm
+    val saved = KeywordSearchForm.defaultForm
       .bind(phraseSearchSession.read(userRequest.sessionId))
-      .fold(_ => PhraseSearchForm(), identity)
+      .fold(_ => KeywordSearchForm(), identity)
     val merged = saved.copy(
       offset = userRequest.getQueryString("offset")
         .map(Pagination.parseOffset(_, 0)).orElse(saved.offset),
@@ -50,19 +50,19 @@ class PhraseController @Inject() (
       merged.limit.getOrElse(DEFAULT_PHRASE_SELECT_LIMIT),
       None
     )
-    val phraseSearchForm = PhraseSearchForm.defaultForm.fill(
+    val keywordSearchForm = KeywordSearchForm.defaultForm.fill(
       merged.copy(offset = Some(pagination.offset)))
 
     // Store the search condition
-    phraseSearchSession.update(userRequest.sessionId, phraseSearchForm.data)
+    phraseSearchSession.update(userRequest.sessionId, keywordSearchForm.data)
 
-    Ok(views.html.phrase.index(pagination, phraseSearchForm))
+    Ok(views.html.phrase.index(pagination, keywordSearchForm))
   }
 
   def search() = userAction { implicit userRequest =>
-    val data = PhraseSearchForm.fromRequest.fold(
-      _ => PhraseSearchForm(), identity)
-    phraseSearchSession.update(userRequest.sessionId, PhraseSearchForm.unbind(data))
+    val data = KeywordSearchForm.fromRequest.fold(
+      _ => KeywordSearchForm(), identity)
+    phraseSearchSession.update(userRequest.sessionId, KeywordSearchForm.unbind(data))
     Redirect(routes.PhraseController.index())
   }
 

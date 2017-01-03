@@ -2,7 +2,6 @@ package models.form
 
 import play.api.data.Forms._
 import play.api.data._
-import play.api.data.format.Formats._
 
 case class AccountLoginForm(
   email: String = "",
@@ -23,8 +22,8 @@ object AccountLoginForm extends NormalizationSupport {
       "email" -> text.verifying(nonBlank("AccountLoginForm.error.email")),
       "password" -> text.verifying(nonBlank("AccountLoginForm.error.password")),
       "returnTo" -> optional(text),
-      "keepMeLoggedIn" -> default(of[Boolean], false),
-      "authorized" -> default(of[Boolean], true)
+      "keepMeLoggedIn" -> default(boolean, false),
+      "authorized" -> default(boolean, true)
         .verifying(passed("AccountLoginForm.error.authorized"))
     )(AccountLoginForm.apply)(AccountLoginForm.unapply)
   )

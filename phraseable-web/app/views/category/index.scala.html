@@ -1,5 +1,5 @@
 @(pagination: components.util.Pagination[models.CategorySelect],
-  categorySearchForm: Form[models.form.CategorySearchForm])
+  keywordSearchForm: Form[models.form.KeywordSearchForm])
 
 @import _helpers.default._
 
@@ -7,7 +7,7 @@
   <div class="form-group">
   @helper.form(routes.CategoryController.search(), 'class -> "form-inline") {
     <div class="form-group">
-      @toHtmlInput(categorySearchForm("q"), 'class -> "form-control")
+      @toHtmlInput(keywordSearchForm("q"), 'class -> "form-control")
     </div>
     <input type="submit" value="Search" class="btn btn-default">
     <a class="btn btn-success" href="@routes.CategoryController.edit(None)">New</a>

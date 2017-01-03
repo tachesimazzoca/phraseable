@@ -6,7 +6,7 @@ import components.util.Pagination
 import controllers.action.{MemberAction, UserAction}
 import controllers.session.UserSessionFactory
 import models._
-import models.form.{CategoryEditForm, CategorySearchForm, PhraseSearchForm}
+import models.form.{CategoryEditForm, KeywordSearchForm}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Controller
 
@@ -41,9 +41,9 @@ class CategoryController @Inject() (
 
   def index() = userAction { implicit userRequest =>
     // Merge saved search session with query parameters
-    val saved = CategorySearchForm.defaultForm
+    val saved = KeywordSearchForm.defaultForm
       .bind(categorySearchSession.read(userRequest.sessionId))
-      .fold(_ => CategorySearchForm(), identity)
+      .fold(_ => KeywordSearchForm(), identity)
     val merged = saved.copy(
       offset = userRequest.getQueryString("offset")
         .map(Pagination.parseOffset(_, 0)).orElse(saved.offset),
@@ -61,19 +61,19 @@ class CategoryController @Inject() (
       merged.orderBy.map(CATEGORY_SELECT_ORDER_BY_MAP)
         .orElse(Some(DEFAULT_CATEGORY_SELECT_ORDER_BY))
     )
-    val categorySearchForm = CategorySearchForm.defaultForm.fill(
+    val keywordSearchForm = KeywordSearchForm.defaultForm.fill(
       merged.copy(offset = Some(pagination.offset)))
 
     // Store the search condition
-    categorySearchSession.update(userRequest.sessionId, categorySearchForm.data)
+    categorySearchSession.update(userRequest.sessionId, keywordSearchForm.data)
 
-    Ok(views.html.category.index(pagination, categorySearchForm))
+    Ok(views.html.category.index(pagination, keywordSearchForm))
   }
 
   def search() = userAction { implicit userRequest =>
-    val data = CategorySearchForm.fromRequest.fold(
-      _ => CategorySearchForm(), identity)
-    categorySearchSession.update(userRequest.sessionId, CategorySearchForm.unbind(data))
+    val data = KeywordSearchForm.fromRequest.fold(
+      _ => KeywordSearchForm(), identity)
+    categorySearchSession.update(userRequest.sessionId, KeywordSearchForm.unbind(data))
     Redirect(routes.CategoryController.index())
   }
 
@@ -82,9 +82,9 @@ class CategoryController @Inject() (
     categoryDao.find(id).map { category =>
 
       // Merge saved search session with query parameters
-      val saved = PhraseSearchForm.defaultForm
+      val saved = KeywordSearchForm.defaultForm
         .bind(categoryDetailSession.read(userRequest.sessionId))
-        .fold(_ => PhraseSearchForm(), identity)
+        .fold(_ => KeywordSearchForm(), identity)
       val merged = saved.copy(
         offset = userRequest.getQueryString("offset")
           .map(Pagination.parseOffset(_, 0)).orElse(saved.offset),
@@ -101,10 +101,10 @@ class CategoryController @Inject() (
         merged.orderBy.map(PHRASE_SELECT_ORDER_BY_MAP)
           .orElse(Some(DEFAULT_PHRASE_SELECT_ORDER_BY))
       )
-      val phraseSearchForm = PhraseSearchForm.defaultForm.fill(
+      val keywordSearchForm = KeywordSearchForm.defaultForm.fill(
         merged.copy(offset = Some(pagination.offset)))
       // Store the search condition
-      categoryDetailSession.update(userRequest.sessionId, phraseSearchForm.data)
+      categoryDetailSession.update(userRequest.sessionId, keywordSearchForm.data)
 
       Ok(views.html.category.detail(category, pagination))
 

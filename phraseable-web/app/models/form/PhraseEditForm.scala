@@ -4,7 +4,6 @@ import models.Phrase
 import org.apache.commons.lang3.StringUtils
 import play.api.data.Forms._
 import play.api.data._
-import play.api.data.format.Formats._
 
 case class PhraseEditForm(
   id: Option[Long],
@@ -25,7 +24,7 @@ object PhraseEditForm extends NormalizationSupport {
 
   private val form = Form(
     mapping(
-      "id" -> optional(of[Long]),
+      "id" -> optional(longNumber),
       "lang" -> text.verifying(nonBlank("PhraseEditForm.error.lang")),
       "term" -> text.verifying(nonBlank("PhraseEditForm.error.term")),
       "translation" -> text,
