@@ -33,6 +33,7 @@ object CategorySelectDao {
   case class Condition(
     keywords: Seq[String] = Seq.empty
   )
+
 }
 
 class CategorySelectDao @Inject() (
@@ -96,9 +97,9 @@ class CategorySelectDao @Inject() (
     if (!condition.keywords.isEmpty) {
       val pairs = new ArrayBuffer[String]
       condition.keywords.foldLeft(0) { (idx, x) =>
-        val k = "titleKeyword_%d".format(idx)
+        val k = "title_%d".format(idx)
         pairs.append(s"title LIKE {${k}}")
-        bindValues.append(Symbol(k) -> s"%${x}%")
+        bindValues.append(Symbol(k) -> s"${x}%")
         idx + 1
       }
       whereConditions.append(pairs.mkString(" OR "))
