@@ -86,9 +86,6 @@ class PhraseService @Inject() (
     } else {
       keywords.append(parseKeywords(phrase.translation): _*)
     }
-    categories.foreach { x =>
-      keywords.append(x.title)
-    }
     phraseKeywordDao.updateKeywords(phrase.id, keywords.toSet.toSeq)
   }
 }
